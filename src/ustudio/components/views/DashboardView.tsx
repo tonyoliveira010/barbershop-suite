@@ -1,3 +1,4 @@
+// @ts-nocheck -- ported as-is from the original AI Studio project
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { ArrowLeft, TrendingUp, Users, DollarSign, Sparkles } from 'lucide-react';

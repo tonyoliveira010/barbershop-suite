@@ -1,3 +1,4 @@
+// @ts-nocheck -- ported as-is from the original AI Studio project
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   Client,

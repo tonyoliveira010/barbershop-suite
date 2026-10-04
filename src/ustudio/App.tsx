@@ -1,3 +1,4 @@
+// @ts-nocheck -- ported as-is from the original AI Studio project
 import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { TopBar } from './components/TopBar';

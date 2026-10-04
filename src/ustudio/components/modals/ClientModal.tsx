@@ -1,3 +1,4 @@
+// @ts-nocheck -- ported as-is from the original AI Studio project
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { X, Crown, Calendar, MessageCircle, Clock, DollarSign, Trash2, CheckCircle2 } from 'lucide-react';

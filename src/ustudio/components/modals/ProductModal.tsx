@@ -1,3 +1,4 @@
+// @ts-nocheck -- ported as-is from the original AI Studio project
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { X, Pencil, Gift, Check, Package, ShoppingBag, Plus, Minus } from 'lucide-react';

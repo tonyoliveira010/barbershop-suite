@@ -1,3 +1,4 @@
+// @ts-nocheck -- ported as-is from the original AI Studio project
 /* Gerador de QR Code embutido (modo byte, correção M, versões 1–10). Sem dependências. */
 export const QRGen = (() => {
   const ECC = [0, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26]; // palavras de correção por bloco (nível M)

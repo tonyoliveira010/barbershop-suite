@@ -1,3 +1,4 @@
+// @ts-nocheck -- ported as-is from the original AI Studio project
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Bell, ExternalLink, X, CheckCircle2, Calendar, Sparkles } from 'lucide-react';

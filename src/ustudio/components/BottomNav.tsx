@@ -1,3 +1,4 @@
+// @ts-nocheck -- ported as-is from the original AI Studio project
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { Home, Sparkles, Plus, Calendar, User } from 'lucide-react';

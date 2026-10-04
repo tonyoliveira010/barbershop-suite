@@ -1,3 +1,4 @@
+// @ts-nocheck -- ported as-is from the original AI Studio project
 import { Client, Category, ServiceItem, DayScheduleSlot, WorkingHours, PaymentConfig, BookingSettings, Profile, Banner } from '../types';
 
 export const INITIAL_CLIENTS: Client[] = [

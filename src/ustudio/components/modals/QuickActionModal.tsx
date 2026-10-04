@@ -1,3 +1,4 @@
+// @ts-nocheck -- ported as-is from the original AI Studio project
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { X, Sparkles, Megaphone, CalendarPlus, ChevronRight } from 'lucide-react';

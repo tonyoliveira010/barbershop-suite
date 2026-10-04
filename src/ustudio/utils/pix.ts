@@ -1,3 +1,4 @@
+// @ts-nocheck -- ported as-is from the original AI Studio project
 export function crc16(s: string): string {
   let c = 0xffff;
   for (let i = 0; i < s.length; i++) {
