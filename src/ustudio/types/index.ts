@@ -82,6 +82,11 @@ export interface Profile {
   avatarEmoji: string;
   avatarUrl?: string;
   layout: 'classic' | 'hero' | 'cinema';
+  serviceDisplay?: 'cards' | 'list';
+  coverOverlayHeight?: number;
+  coverOverlayIntensity?: number;
+  bannerPosition?: 'above-tabs' | 'below-categories';
+  videoCarouselPosition?: 'above-tabs' | 'below-categories';
 
   // Storefront specific config
   title: string;
