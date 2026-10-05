@@ -25,8 +25,8 @@ export const PublicPagePreferences: React.FC = () => {
   const addVideos = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []).slice(0, Math.max(0, 4 - videos.length));
     if (!files.length) return;
-    if (files.some((file) => file.size > 2 * 1024 * 1024)) {
-      showToast('Cada vídeo deve ter até 2 MB para ser salvo neste aparelho');
+    if (files.some((file) => file.size > 700 * 1024)) {
+      showToast('Cada vídeo deve ter até 700 KB para ser salvo neste aparelho');
       return;
     }
     Promise.all(files.map((file) => new Promise((resolve) => {
@@ -77,7 +77,7 @@ export const PublicPagePreferences: React.FC = () => {
             <PositionSelector value={profile.videoCarouselPosition || 'below-categories'} onChange={(videoCarouselPosition) => saveProfile({ videoCarouselPosition })} />
             <input ref={inputRef} type="file" accept="video/*" multiple className="hidden" onChange={addVideos} />
             <button type="button" onClick={() => inputRef.current?.click()} className="flex w-full items-center justify-center gap-2 rounded-full bg-white py-3 text-xs font-bold text-black"><Upload className="h-4 w-4" /> Enviar vídeos</button>
-            <p className="text-center text-[10px] text-white/35">Demonstração local do recurso premium · até 4 vídeos de 2 MB</p>
+            <p className="text-center text-[10px] text-white/35">Demonstração local do recurso premium · até 4 vídeos de 700 KB</p>
           </div>}
         </div>
       </div>}

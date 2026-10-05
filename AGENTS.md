@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - The Ustudio app lives in src/ustudio (ported from the AI Studio repo) and renders client-only from the index route — it keeps state in browser storage.
+- Public-page display preferences and premium media demos stay in the existing browser profile state because the app has no connected backend.

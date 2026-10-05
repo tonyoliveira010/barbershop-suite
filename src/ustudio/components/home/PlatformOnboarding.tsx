@@ -32,6 +32,13 @@ const steps = [
     points: ['Defina antecedência e intervalos', 'Receba os dados do cliente organizados'],
   },
   {
+    kicker: 'Agenda do dia',
+    title: 'Tenha o dia sob controle',
+    text: 'Acompanhe clientes, horários livres e detalhes de cada atendimento em uma única visão.',
+    icon: CalendarDays,
+    points: ['Reagende com poucos toques', 'Bloqueie horários quando precisar'],
+  },
+  {
     kicker: 'Financeiro',
     title: 'Acompanhe cada resultado',
     text: 'Veja faturamento, atendimentos e ticket médio em períodos diferentes.',
