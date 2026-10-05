@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { COVER_PRESETS } from '../../data/initialData';
 import { PageFormatSelector } from '../common/PageFormatSelector';
 import { DataEditModal, DataEditType } from '../modals/DataEditModal';
+import { PublicPagePreferences } from '../profile/PublicPagePreferences';
 import {
   Pencil,
   BadgeCheck,
@@ -381,6 +382,8 @@ export const ProfileView: React.FC = () => {
         <PageFormatSelector showSectionHeader={false} />
       </section>
 
+      <PublicPagePreferences />
+
       {/* Componentes de Editar Dados: Avaliações no Google, Agendamento InfinitePay, Pagamento Pix, Informações de Contato */}
       <section className="px-5 space-y-3">
         <div className="flex items-baseline justify-between">
@@ -508,48 +511,6 @@ export const ProfileView: React.FC = () => {
           className="p-4 rounded-2xl bg-[#161616] border border-white/10 hover:border-white/20 text-xs sm:text-sm text-white/75 leading-relaxed cursor-pointer transition-colors"
         >
           {profile.about || 'Clique para escrever sobre sua trajetória e formação profissional.'}
-        </div>
-      </section>
-
-      {/* Promotional Banners */}
-      <section className="px-5 space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-white tracking-tight">Banners promocionais</h3>
-          <span className="text-xs text-white/40">{banners.length} ativos</span>
-        </div>
-
-        <div className="space-y-2.5">
-          {banners.map((b) => (
-            <div
-              key={b.id}
-              className="p-4 rounded-2xl bg-gradient-to-r from-[#ff5f8a] to-[#8f0d24] text-white relative overflow-hidden shadow-md flex items-center justify-between gap-3"
-            >
-              <div className="min-w-0">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/80 block mb-0.5">
-                  {b.emoji ? `${b.emoji} ` : ''}
-                  {b.kicker}
-                </span>
-                <h4 className="text-sm font-bold text-white leading-tight truncate">{b.title}</h4>
-                <p className="text-xs text-white/80 mt-0.5 truncate">{b.sub}</p>
-              </div>
-
-              <button
-                onClick={() => removeBanner(b.id)}
-                className="w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center text-white/80 hover:text-white transition-colors flex-shrink-0"
-                aria-label="Remover banner"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ))}
-
-          <button
-            onClick={() => setIsBannerModalOpen(true)}
-            className="w-full py-3.5 rounded-2xl bg-[#161616] border border-dashed border-white/20 hover:border-white/40 text-xs font-bold text-white/60 hover:text-white flex items-center justify-center gap-1.5 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Adicionar novo banner</span>
-          </button>
         </div>
       </section>
 
