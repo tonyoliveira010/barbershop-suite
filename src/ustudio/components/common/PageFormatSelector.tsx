@@ -1,18 +1,20 @@
 // @ts-nocheck -- ported as-is from the original AI Studio project
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { Check } from 'lucide-react';
+import { Check, SlidersHorizontal } from 'lucide-react';
 
 interface PageFormatSelectorProps {
   currentLayout?: 'classic' | 'hero' | 'cinema';
   onChange?: (layout: 'classic' | 'hero' | 'cinema') => void;
   showSectionHeader?: boolean;
+  onEditOverlay?: () => void;
 }
 
 export const PageFormatSelector: React.FC<PageFormatSelectorProps> = ({
   currentLayout,
   onChange,
   showSectionHeader = true,
+  onEditOverlay,
 }) => {
   const { profile, saveProfile, showToast } = useApp();
   const selectedLayout = currentLayout || profile.layout || 'classic';
@@ -53,9 +55,10 @@ export const PageFormatSelector: React.FC<PageFormatSelectorProps> = ({
           role="radio"
         >
           {selectedLayout === 'classic' && (
-            <span className="absolute top-3.5 right-3.5 w-[22px] h-[22px] rounded-full bg-white text-black flex items-center justify-center z-10 shadow-sm">
-              <Check className="w-3.5 h-3.5 stroke-[3]" />
-            </span>
+            <>
+              <span className="absolute top-3.5 right-3.5 w-[22px] h-[22px] rounded-full bg-white text-black flex items-center justify-center z-10 shadow-sm"><Check className="w-3.5 h-3.5 stroke-[3]" /></span>
+              {onEditOverlay && <span onClick={(event) => { event.stopPropagation(); onEditOverlay(); }} className="absolute left-3.5 top-3.5 z-10 inline-flex min-h-6 items-center gap-1 rounded-full border border-white/20 bg-black/70 px-2 text-[9px] font-bold text-white"><SlidersHorizontal className="h-3 w-3" /> Overlay</span>}
+            </>
           )}
 
           {/* Thumbnail Clássico */}
@@ -94,9 +97,10 @@ export const PageFormatSelector: React.FC<PageFormatSelectorProps> = ({
           role="radio"
         >
           {selectedLayout === 'hero' && (
-            <span className="absolute top-3.5 right-3.5 w-[22px] h-[22px] rounded-full bg-white text-black flex items-center justify-center z-10 shadow-sm">
-              <Check className="w-3.5 h-3.5 stroke-[3]" />
-            </span>
+            <>
+              <span className="absolute top-3.5 right-3.5 w-[22px] h-[22px] rounded-full bg-white text-black flex items-center justify-center z-10 shadow-sm"><Check className="w-3.5 h-3.5 stroke-[3]" /></span>
+              {onEditOverlay && <span onClick={(event) => { event.stopPropagation(); onEditOverlay(); }} className="absolute left-3.5 top-3.5 z-10 inline-flex min-h-6 items-center gap-1 rounded-full border border-white/20 bg-black/70 px-2 text-[9px] font-bold text-white"><SlidersHorizontal className="h-3 w-3" /> Overlay</span>}
+            </>
           )}
 
           {/* Thumbnail Destaque */}
@@ -134,9 +138,10 @@ export const PageFormatSelector: React.FC<PageFormatSelectorProps> = ({
           role="radio"
         >
           {selectedLayout === 'cinema' && (
-            <span className="absolute top-3.5 right-3.5 w-[22px] h-[22px] rounded-full bg-white text-black flex items-center justify-center z-10 shadow-sm">
-              <Check className="w-3.5 h-3.5 stroke-[3]" />
-            </span>
+            <>
+              <span className="absolute top-3.5 right-3.5 w-[22px] h-[22px] rounded-full bg-white text-black flex items-center justify-center z-10 shadow-sm"><Check className="w-3.5 h-3.5 stroke-[3]" /></span>
+              {onEditOverlay && <span onClick={(event) => { event.stopPropagation(); onEditOverlay(); }} className="absolute left-3.5 top-3.5 z-10 inline-flex min-h-6 items-center gap-1 rounded-full border border-white/20 bg-black/70 px-2 text-[9px] font-bold text-white"><SlidersHorizontal className="h-3 w-3" /> Overlay</span>}
+            </>
           )}
 
           {/* Thumbnail Cinema 9:16 */}

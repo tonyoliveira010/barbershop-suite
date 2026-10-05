@@ -11,3 +11,5 @@
 - [x] Remover botão flutuante de agendamento público
 - [x] Trocar gráfico de barras do dashboard por gráfico de linhas
 - [x] Verificar tela móvel, interações e erros
+- [ ] Restaurar formatos visíveis no Perfil, com badge do overlay no selecionado
+- [ ] Mostrar Cards/Lista com foto logo abaixo dos formatos
