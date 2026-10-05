@@ -10,4 +10,4 @@
 - [x] Onboarding seguindo a estrutura completa do código enviado
 - [x] Remover botão flutuante de agendamento público
 - [x] Trocar gráfico de barras do dashboard por gráfico de linhas
-- [ ] Verificar tela móvel, interações e erros
+- [x] Verificar tela móvel, interações e erros
