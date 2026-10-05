@@ -60,6 +60,7 @@ export const PageFormatSelector: React.FC<PageFormatSelectorProps> = ({
 
           {/* Thumbnail Clássico */}
           <div className="h-[92px] rounded-xl bg-black relative overflow-hidden mb-3 flex-shrink-0 border border-white/10">
+            <div className="absolute inset-x-0 bottom-0 z-[1] bg-gradient-to-t from-black to-transparent pointer-events-none" style={{ height: `${profile.coverOverlayHeight ?? 70}%`, opacity: (profile.coverOverlayIntensity ?? 50) / 100 }} />
             {/* Top gradient cover slice */}
             <div className="h-[46px] w-full bg-gradient-to-r from-[#ff5f8a] via-[#ef1f4d] to-[#8f0d24] opacity-90" />
             {/* Lateral avatar overlapping */}
@@ -100,6 +101,7 @@ export const PageFormatSelector: React.FC<PageFormatSelectorProps> = ({
 
           {/* Thumbnail Destaque */}
           <div className="h-[92px] rounded-xl bg-black relative overflow-hidden mb-3 flex-shrink-0 border border-white/10 flex flex-col items-center">
+            <div className="absolute inset-x-0 bottom-0 z-[1] bg-gradient-to-t from-black to-transparent pointer-events-none" style={{ height: `${profile.coverOverlayHeight ?? 70}%`, opacity: (profile.coverOverlayIntensity ?? 50) / 100 }} />
             {/* Top gradient cover slice */}
             <div className="h-[46px] w-full bg-gradient-to-r from-[#ff5f8a] via-[#ef1f4d] to-[#8f0d24] opacity-90" />
             {/* Centered avatar overlapping */}
@@ -139,6 +141,7 @@ export const PageFormatSelector: React.FC<PageFormatSelectorProps> = ({
 
           {/* Thumbnail Cinema 9:16 */}
           <div className="h-[92px] rounded-xl relative overflow-hidden mb-3 flex-shrink-0 border border-white/10 bg-gradient-to-b from-[#6b1a30] via-[#2a0a14] to-[#0a0305]">
+            <div className="absolute inset-x-0 bottom-0 z-[1] bg-gradient-to-t from-black to-transparent pointer-events-none" style={{ height: `${profile.coverOverlayHeight ?? 70}%`, opacity: (profile.coverOverlayIntensity ?? 50) / 100 }} />
             <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/90 pointer-events-none" />
             {/* Bottom typography simulation */}
             <div className="absolute left-2.5 bottom-5 flex items-center gap-1">

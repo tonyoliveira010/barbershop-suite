@@ -131,23 +131,13 @@ export const DashboardView: React.FC = () => {
           </span>
         </div>
 
-        {/* SVG Bars Visual */}
-        <div className="h-36 w-full flex items-end justify-between gap-2 pt-4 px-2">
-          {currentData.bars.map((height, i) => (
-            <div key={i} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
-              <div
-                className="w-full max-w-[32px] rounded-t-lg bg-gradient-to-t from-[#8f0d24] via-[#ef1f4d] to-[#ff5f8a] group-hover:brightness-125 transition-all relative"
-                style={{ height: `${height}%` }}
-              >
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black text-[10px] text-white px-1.5 py-0.5 rounded border border-white/20 pointer-events-none whitespace-nowrap z-10">
-                  {height}%
-                </div>
-              </div>
-              <span className="text-[10px] font-medium text-white/40 block truncate">
-                {currentData.labels[i]}
-              </span>
-            </div>
-          ))}
+        <div className="relative h-40 w-full pt-3">
+          <svg viewBox="0 0 320 120" className="h-[120px] w-full overflow-visible" role="img" aria-label="Evolução de vendas e atendimentos">
+            {[20, 50, 80, 110].map((y) => <line key={y} x1="8" x2="312" y1={y} y2={y} stroke="rgba(255,255,255,.08)" />)}
+            <polyline points={currentData.bars.map((value, index) => `${8 + index * (304 / Math.max(1, currentData.bars.length - 1))},${112 - value}`).join(' ')} fill="none" stroke="#ff5f8a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            {currentData.bars.map((value, index) => <circle key={index} cx={8 + index * (304 / Math.max(1, currentData.bars.length - 1))} cy={112 - value} r="4" fill="#161616" stroke="#ff5f8a" strokeWidth="3"><title>{value}%</title></circle>)}
+          </svg>
+          <div className="flex justify-between px-1">{currentData.labels.map((label) => <span key={label} className="text-[10px] font-medium text-white/40">{label}</span>)}</div>
         </div>
       </div>
 

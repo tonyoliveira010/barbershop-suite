@@ -87,6 +87,7 @@ export interface Profile {
   coverOverlayIntensity?: number;
   bannerPosition?: 'above-tabs' | 'below-categories';
   videoCarouselPosition?: 'above-tabs' | 'below-categories';
+  promoVideos?: Array<{ id: string; url: string; name: string }>;
 
   // Storefront specific config
   title: string;
@@ -113,4 +114,6 @@ export interface Banner {
   title: string;
   sub: string;
   emoji?: string;
+  image?: string;
+  position?: 'above-tabs' | 'below-categories';
 }
