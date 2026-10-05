@@ -1,10 +1,9 @@
 // @ts-nocheck -- ported app uses browser-only state
 import React, { useRef, useState } from 'react';
-import { ChevronRight, Image, LayoutGrid, List, LockKeyhole, Play, Upload, X } from 'lucide-react';
+import { ChevronRight, Image, LockKeyhole, Play, Upload, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { PageFormatSelector } from '../common/PageFormatSelector';
 
-type Editor = 'format' | 'banners' | 'videos' | null;
+type Editor = 'banners' | 'videos' | null;
 
 const PositionSelector = ({ value, onChange }) => (
   <div className="grid grid-cols-2 gap-1 rounded-xl bg-[#0d0d0d] p-1">
@@ -37,7 +36,6 @@ export const PublicPagePreferences: React.FC = () => {
   };
 
   const cards = [
-    { id: 'format', title: 'Formato da página pública', detail: `${profile.layout === 'hero' ? 'Destaque' : profile.layout === 'cinema' ? 'Cinema 9:16' : 'Clássico'} · Serviços em ${profile.serviceDisplay === 'cards' ? 'cards' : 'lista'}`, icon: LayoutGrid },
     { id: 'banners', title: 'Banners promocionais', detail: 'Imagem, texto e posição individual', icon: Image, premium: true },
     { id: 'videos', title: 'Carrossel de vídeos', detail: `${videos.length} de 4 vídeos · formato 200 × 300`, icon: Play, premium: true },
   ];
@@ -57,20 +55,9 @@ export const PublicPagePreferences: React.FC = () => {
       {editor && <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 sm:items-center sm:p-4" onClick={() => setEditor(null)}>
         <div className="max-h-[90vh] w-full max-w-[430px] overflow-y-auto rounded-t-3xl border border-white/15 bg-[#161616] p-5 sm:rounded-3xl" onClick={(event) => event.stopPropagation()}>
           <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3.5">
-            <div><h3 className="text-base font-bold text-white">{editor === 'format' ? 'Formato da página pública' : 'Carrossel de vídeos'}</h3>{editor === 'videos' && <div className="mt-1"><UpgradeBadge /></div>}</div>
+            <div><h3 className="text-base font-bold text-white">Carrossel de vídeos</h3>{editor === 'videos' && <div className="mt-1"><UpgradeBadge /></div>}</div>
             <button type="button" onClick={() => setEditor(null)} aria-label="Fechar" className="flex h-8 w-8 items-center justify-center rounded-full bg-[#262626] text-white/70"><X className="h-4 w-4" /></button>
           </div>
-
-          {editor === 'format' && <div className="space-y-5">
-            <PageFormatSelector showSectionHeader={false} />
-            <div><span className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-white/45">Exibição dos serviços</span><div className="grid grid-cols-2 gap-2">
-              {[['cards', 'Cards', LayoutGrid], ['list', 'Lista com foto', List]].map(([value, label, Icon]) => <button key={value} type="button" onClick={() => saveProfile({ serviceDisplay: value })} className={`flex min-h-11 items-center justify-center gap-2 rounded-xl border text-xs font-semibold ${profile.serviceDisplay === value ? 'border-white bg-white text-black' : 'border-white/10 bg-[#0d0d0d] text-white/60'}`}><Icon className="h-4 w-4" />{label}</button>)}
-            </div></div>
-            <div className="border-t border-white/10 pt-4"><b className="mb-3 block text-xs text-white">Overlay da capa</b>
-              <label className="mb-4 block"><span className="mb-1.5 flex justify-between text-[11px] text-white/60"><span>Altura</span><b className="text-white">{profile.coverOverlayHeight ?? 70}%</b></span><input type="range" min="25" max="100" step="5" value={profile.coverOverlayHeight ?? 70} onChange={(e) => saveProfile({ coverOverlayHeight: Number(e.target.value) })} className="w-full accent-[#ff5f8a]" /></label>
-              <label className="block"><span className="mb-1.5 flex justify-between text-[11px] text-white/60"><span>Intensidade</span><b className="text-white">{profile.coverOverlayIntensity ?? 50}%</b></span><input type="range" min="10" max="90" step="5" value={profile.coverOverlayIntensity ?? 50} onChange={(e) => saveProfile({ coverOverlayIntensity: Number(e.target.value) })} className="w-full accent-[#ff5f8a]" /></label>
-            </div>
-          </div>}
 
           {editor === 'videos' && <div className="space-y-4">
             <div className="no-scrollbar flex gap-2 overflow-x-auto">{videos.length ? videos.map((video) => <div key={video.id} className="relative h-[300px] w-[200px] flex-none overflow-hidden rounded-xl border border-white/10 bg-[#0d0d0d]"><video src={video.url} muted controls className="h-full w-full object-cover" /><button type="button" onClick={() => saveProfile({ promoVideos: videos.filter((item) => item.id !== video.id) })} className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white"><X className="h-3.5 w-3.5" /></button></div>) : <div className="flex h-[300px] w-[200px] flex-none flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-[#0d0d0d] text-white/35"><Play className="h-7 w-7" /><span className="text-[10px]">200 × 300</span></div>}</div>

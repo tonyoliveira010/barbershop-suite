@@ -21,6 +21,9 @@ import {
   ShieldCheck,
   ChevronRight,
   Camera,
+  LayoutGrid,
+  List,
+  X,
 } from 'lucide-react';
 
 export const ProfileView: React.FC = () => {
@@ -41,6 +44,7 @@ export const ProfileView: React.FC = () => {
   } = useApp();
 
   const [activeDataModal, setActiveDataModal] = useState<DataEditType>(null);
+  const [isOverlayEditorOpen, setIsOverlayEditorOpen] = useState(false);
   const fileCoverRef = useRef<HTMLInputElement>(null);
   const fileAvatarRef = useRef<HTMLInputElement>(null);
 
@@ -373,7 +377,25 @@ export const ProfileView: React.FC = () => {
         </div>
       </div>
 
+      <section className="space-y-4 px-5">
+        <PageFormatSelector onEditOverlay={() => setIsOverlayEditorOpen(true)} />
+        <div>
+          <div className="mb-2 flex items-baseline justify-between"><h3 className="text-sm font-bold text-white">Exibição dos serviços</h3><span className="text-xs text-white/40">Na página pública</span></div>
+          <div className="grid grid-cols-2 gap-2">
+            {[['cards', 'Cards', LayoutGrid], ['list', 'Lista com foto', List]].map(([value, label, Icon]) => <button key={value} type="button" onClick={() => saveProfile({ serviceDisplay: value })} className={`flex min-h-12 items-center justify-center gap-2 rounded-xl border text-xs font-semibold ${profile.serviceDisplay === value ? 'border-white bg-white text-black' : 'border-white/10 bg-[#141414] text-white/60'}`}><Icon className="h-4 w-4" />{label}</button>)}
+          </div>
+        </div>
+      </section>
+
       <PublicPagePreferences />
+
+      {isOverlayEditorOpen && <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 sm:items-center sm:p-4" onClick={() => setIsOverlayEditorOpen(false)}>
+        <div className="w-full max-w-[430px] rounded-t-3xl border border-white/15 bg-[#161616] p-5 sm:rounded-3xl" onClick={(event) => event.stopPropagation()}>
+          <div className="mb-5 flex items-center justify-between border-b border-white/10 pb-3.5"><div><h3 className="text-base font-bold text-white">Overlay da capa</h3><span className="text-[11px] text-white/45">{layout === 'hero' ? 'Destaque' : layout === 'cinema' ? 'Cinema 9:16' : 'Clássico'}</span></div><button type="button" onClick={() => setIsOverlayEditorOpen(false)} aria-label="Fechar" className="flex h-8 w-8 items-center justify-center rounded-full bg-[#262626] text-white/70"><X className="h-4 w-4" /></button></div>
+          <label className="mb-5 block"><span className="mb-2 flex justify-between text-xs text-white/60"><span>Altura</span><b className="text-white">{profile.coverOverlayHeight ?? 70}%</b></span><input type="range" min="25" max="100" step="5" value={profile.coverOverlayHeight ?? 70} onChange={(e) => saveProfile({ coverOverlayHeight: Number(e.target.value) })} className="w-full accent-[#ff5f8a]" /></label>
+          <label className="block"><span className="mb-2 flex justify-between text-xs text-white/60"><span>Intensidade</span><b className="text-white">{profile.coverOverlayIntensity ?? 50}%</b></span><input type="range" min="10" max="90" step="5" value={profile.coverOverlayIntensity ?? 50} onChange={(e) => saveProfile({ coverOverlayIntensity: Number(e.target.value) })} className="w-full accent-[#ff5f8a]" /></label>
+        </div>
+      </div>}
 
       {/* Componentes de Editar Dados: Avaliações no Google, Agendamento InfinitePay, Pagamento Pix, Informações de Contato */}
       <section className="px-5 space-y-3">
