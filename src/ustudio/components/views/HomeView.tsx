@@ -1,6 +1,7 @@
 // @ts-nocheck -- ported as-is from the original AI Studio project
 import React from 'react';
 import { useApp } from '../../context/AppContext';
+import { PlatformOnboarding } from '../home/PlatformOnboarding';
 import {
   ExternalLink,
   MapPin,
@@ -117,6 +118,8 @@ export const HomeView: React.FC = () => {
           </button>
         </div>
       </div>
+
+      <PlatformOnboarding />
 
       {/* Categorias / Funções da Plataforma (Ícone clean tamanho 70px) */}
       <section className="px-5">
