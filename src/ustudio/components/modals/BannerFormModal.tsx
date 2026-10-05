@@ -20,12 +20,12 @@ export const BannerFormModal: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!image && !title.trim()) return;
 
     addBanner({
-      kicker: kicker.trim() || 'Destaque',
+      kicker: image ? '' : kicker.trim(),
       title: title.trim(),
-      sub: sub.trim() || 'Aproveite por tempo limitado',
+      sub: sub.trim(),
       emoji,
       image,
       position,
@@ -72,10 +72,20 @@ export const BannerFormModal: React.FC = () => {
           <div>
             <input ref={imageRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
             <button type="button" onClick={() => imageRef.current?.click()} className="relative flex h-32 w-full items-center justify-center overflow-hidden rounded-2xl border border-dashed border-white/20 bg-[#1e1e1e] text-white/55">
-              {image ? <img src={image} alt="Prévia do banner" className="h-full w-full object-cover" /> : <span className="flex items-center gap-2 font-semibold"><ImagePlus className="h-4 w-4" /> Enviar imagem do banner</span>}
+              {image ? <><img src={image} alt="Prévia do banner" className="h-full w-full object-cover" /><span onClick={(e) => { e.stopPropagation(); setImage(''); }} className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-1 text-[10px] text-white">Remover</span></> : <span className="flex items-center gap-2 font-semibold"><ImagePlus className="h-4 w-4" /> Enviar imagem do banner</span>}
             </button>
             <span className="mt-1 block text-[10px] text-white/35">JPG, PNG ou WebP · até 4 MB</span>
           </div>
+          <div>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-white/40 block mb-1.5">Posição deste banner</label>
+            <div className="grid grid-cols-2 gap-1 rounded-xl bg-[#1e1e1e] p-1">
+              {[['above-tabs', 'Acima das abas'], ['below-categories', 'Abaixo das categorias']].map(([value, label]) => (
+                <button key={value} type="button" onClick={() => setPosition(value as any)} className={`rounded-lg px-2 py-2 text-[10px] font-semibold ${position === value ? 'bg-white text-black' : 'text-white/50'}`}>{label}</button>
+              ))}
+            </div>
+          </div>
+
+          {image ? <p className="text-[10px] text-white/40">Com imagem, título, subtítulo e ícone não são necessários.</p> : <>
           <div>
             <label className="text-[10px] font-bold uppercase tracking-wider text-white/40 block mb-1">
               Selo pequeno
@@ -90,21 +100,11 @@ export const BannerFormModal: React.FC = () => {
           </div>
 
           <div>
-            <label className="text-[10px] font-bold uppercase tracking-wider text-white/40 block mb-1.5">Posição deste banner</label>
-            <div className="grid grid-cols-2 gap-1 rounded-xl bg-[#1e1e1e] p-1">
-              {[['above-tabs', 'Acima das abas'], ['below-categories', 'Abaixo das categorias']].map(([value, label]) => (
-                <button key={value} type="button" onClick={() => setPosition(value as any)} className={`rounded-lg px-2 py-2 text-[10px] font-semibold ${position === value ? 'bg-white text-black' : 'text-white/50'}`}>{label}</button>
-              ))}
-            </div>
-          </div>
-
-          <div>
             <label className="text-[10px] font-bold uppercase tracking-wider text-white/40 block mb-1">
               Título do anúncio
             </label>
             <input
               type="text"
-              required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ex: 20% off em Limpeza de pele"
@@ -147,6 +147,8 @@ export const BannerFormModal: React.FC = () => {
             </div>
           </div>
 
+          </>}
+
           <div className="flex gap-2 pt-4 border-t border-white/10 mt-4">
             <button
               type="button"
@@ -157,7 +159,7 @@ export const BannerFormModal: React.FC = () => {
             </button>
             <button
               type="submit"
-              disabled={!title.trim()}
+              disabled={!image && !title.trim()}
               className="flex-1 py-3 rounded-full bg-white hover:bg-white/90 text-black text-xs font-bold transition-colors disabled:opacity-50"
             >
               Adicionar banner
@@ -172,7 +174,7 @@ export const BannerFormModal: React.FC = () => {
               <div key={banner.id} className="rounded-xl border border-white/10 bg-[#1e1e1e] p-3">
                 <div className="mb-2 flex items-center gap-2">
                   {banner.image ? <img src={banner.image} alt="" className="h-10 w-12 rounded-lg object-cover" /> : <span className="flex h-10 w-12 items-center justify-center rounded-lg bg-white/5">{banner.emoji}</span>}
-                  <b className="min-w-0 flex-1 truncate text-xs text-white">{banner.title}</b>
+                  <b className="min-w-0 flex-1 truncate text-xs text-white">{banner.title || 'Banner com imagem'}</b>
                   <button type="button" onClick={() => removeBanner(banner.id)} aria-label="Remover banner" className="flex h-8 w-8 items-center justify-center rounded-full text-white/40 hover:text-white"><Trash2 className="h-3.5 w-3.5" /></button>
                 </div>
                 <select value={banner.position || 'above-tabs'} onChange={(event) => updateBanner({ ...banner, position: event.target.value as any })} className="w-full rounded-lg border border-white/10 bg-[#141414] px-2 py-2 text-[11px] text-white">
