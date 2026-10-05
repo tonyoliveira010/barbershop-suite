@@ -45,7 +45,8 @@ export const PublicStorefront: React.FC = () => {
   const coverType = profile.coverType || 'image';
   const avatar = profile.avatar || '';
   const serviceDisplay = profile.serviceDisplay || 'list';
-  const banners = useApp().banners;
+  const { banners, categories = [] } = useApp();
+  const renderBanner = (banner) => <div key={banner.id} className="relative h-28 min-w-[300px] flex-none overflow-hidden rounded-2xl border border-white/10 bg-[#161616] p-4">{banner.image ? <img src={banner.image} alt={banner.title || 'Banner promocional'} className="absolute inset-0 h-full w-full object-cover" /> : <div className="relative z-10 flex items-center gap-3"><span className="text-3xl">{banner.emoji}</span><div className="min-w-0">{banner.kicker && <span className="text-[10px] font-bold uppercase text-white/70">{banner.kicker}</span>}<b className="block text-sm text-white">{banner.title}</b>{banner.sub && <span className="text-xs text-white/70">{banner.sub}</span>}</div></div>}</div>;
   const promoVideos = profile.promoVideos || [];
 
   // Tabs state (servicos, sobre mim com localização e contato unificados, pagamento)
@@ -466,9 +467,7 @@ export const PublicStorefront: React.FC = () => {
         )}
 
         {banners.some((banner) => (banner.position || 'above-tabs') === 'above-tabs') && <div className="no-scrollbar mt-4 flex gap-3 overflow-x-auto px-4">
-          {banners.filter((banner) => (banner.position || 'above-tabs') === 'above-tabs').map((banner) => <div key={banner.id} className="relative h-28 min-w-[300px] overflow-hidden rounded-2xl border border-white/10 bg-[#161616] p-4">
-            {banner.image && <img src={banner.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-50" />}<div className="relative z-10"><span className="text-[10px] font-bold uppercase text-white/70">{banner.kicker}</span><b className="mt-1 block text-sm text-white">{banner.title}</b><span className="text-xs text-white/70">{banner.sub}</span></div>
-          </div>)}
+          {banners.filter((banner) => (banner.position || 'above-tabs') === 'above-tabs').map(renderBanner)}
         </div>}
 
         {promoVideos.length > 0 && profile.videoCarouselPosition === 'above-tabs' && <div className="no-scrollbar mt-4 flex gap-3 overflow-x-auto px-4">{promoVideos.map((video) => <video key={video.id} src={video.url} controls muted playsInline className="h-[300px] w-[200px] flex-none rounded-2xl object-cover" />)}</div>}
@@ -497,33 +496,60 @@ export const PublicStorefront: React.FC = () => {
 
         {/* TAB 1: SERVIÇOS */}
         {activeTab === 'servicos' && (
-          <div className={serviceDisplay === 'cards' ? 'grid grid-cols-2 gap-3 p-4' : 'p-4 space-y-2.5'}>
-            {services.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => openBookingFor(s)}
-                className={serviceDisplay === 'cards' ? 'overflow-hidden rounded-2xl bg-[#161616] border border-white/10 text-left group' : 'w-full p-3 rounded-2xl bg-[#161616] border border-white/10 hover:bg-[#1e1e1e] hover:border-white/25 transition-all text-left flex items-center gap-3 group'}
-              >
-                {s.image ? <img src={s.image} alt="" className={serviceDisplay === 'cards' ? 'h-28 w-full object-cover' : 'h-14 w-14 flex-none rounded-xl object-cover'} /> : <span className={serviceDisplay === 'cards' ? 'flex h-28 w-full items-center justify-center bg-[#202020] text-2xl' : 'flex h-14 w-14 flex-none items-center justify-center rounded-xl bg-[#202020] text-lg'}>{s.emoji || '✂️'}</span>}
-                <div className={serviceDisplay === 'cards' ? 'p-3' : 'contents'}>
-                <div className="min-w-0 flex-1">
-                  <b className="text-sm font-bold text-white block group-hover:text-rose-400 transition-colors">
-                    {s.name}
-                  </b>
-                  <span className="text-xs text-white/50 block mt-0.5">{s.duration}</span>
-                  {serviceDisplay === 'list' && s.desc && <span className="mt-0.5 line-clamp-1 block text-[10px] text-white/35">{s.desc}</span>}
+          <div className="space-y-5 p-4">
+            {(categories.length ? categories : [{ key: '__all', label: 'Serviços', emoji: '✂️' }]).map((cat) => {
+              const items = cat.key === '__all' ? services : services.filter((s) => s.cat === cat.key);
+              if (!items.length) return null;
+              return (
+                <div key={cat.key} className="space-y-3">
+                  <div className="flex items-baseline justify-between">
+                    <div className="flex min-w-0 items-center gap-2"><span className="text-base">{cat.emoji}</span><h3 className="truncate text-lg font-bold tracking-tight text-white">{cat.label}</h3></div>
+                    <span className="shrink-0 text-xs text-white/45">{items.length} {items.length === 1 ? 'item' : 'itens'}</span>
+                  </div>
+                  {serviceDisplay === 'cards' ? (
+                    <div className="no-scrollbar -mx-4 flex gap-3.5 overflow-x-auto px-4 pb-3 pt-1">
+                      {items.map((s) => (
+                        <button key={s.id} type="button" onClick={() => openBookingFor(s)} className="group flex w-[240px] flex-shrink-0 flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#161616] text-left shadow-lg transition-all hover:border-white/30">
+                          <div className="relative flex h-36 w-full items-center justify-center overflow-hidden text-5xl" style={{ background: s.image ? `url('${s.image}') center/cover no-repeat` : `linear-gradient(180deg, ${cat.soft || '#262626'} 0%, rgba(22,22,22,0.85) 100%)` }}>
+                            {s.badge && <span className="absolute left-3 top-3 z-10 rounded-full bg-gradient-to-r from-[#ff5f8a] to-[#ef1f4d] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-white shadow-md">{s.badge}</span>}
+                            {!s.image && <span>{s.emoji || cat.emoji}</span>}
+                          </div>
+                          <div className="flex flex-1 flex-col justify-between p-4">
+                            <div>
+                              <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-[#ff5f8a]">{cat.label}</span>
+                              <h4 className="mb-1 line-clamp-1 text-sm font-bold leading-snug text-white">{s.name}</h4>
+                              <p className="mb-3 line-clamp-2 text-xs leading-relaxed text-white/55">{s.desc}</p>
+                            </div>
+                            <div className="flex items-center justify-between border-t border-white/10 pt-2">
+                              <div><span className="block text-base font-extrabold text-white">{s.price}</span><span className="text-[10px] text-white/45">{s.duration}</span></div>
+                              <span className="rounded-full bg-gradient-to-r from-[#ff5f8a] to-[#ef1f4d] px-3.5 py-1.5 text-xs font-bold text-white shadow-md">Agendar</span>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-2.5">
+                      {items.map((s) => (
+                        <button key={s.id} type="button" onClick={() => openBookingFor(s)} className="group flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-[#161616] p-3 text-left transition-all hover:border-white/25 hover:bg-[#1e1e1e]">
+                          {s.image ? <img src={s.image} alt="" className="h-14 w-14 flex-none rounded-xl object-cover" /> : <span className="flex h-14 w-14 flex-none items-center justify-center rounded-xl bg-[#202020] text-lg">{s.emoji || cat.emoji || '✂️'}</span>}
+                          <div className="min-w-0 flex-1">
+                            <b className="block truncate text-sm font-bold text-white">{s.name}</b>
+                            <span className="mt-0.5 block text-xs text-white/50">{s.duration}</span>
+                            {s.desc && <span className="mt-0.5 line-clamp-1 block text-[10px] text-white/35">{s.desc}</span>}
+                          </div>
+                          <span className="flex-shrink-0 rounded-full bg-[#262626] px-3.5 py-1.5 text-xs font-bold text-white transition-colors group-hover:bg-white group-hover:text-black">{s.price}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <span className="px-3.5 py-1.5 rounded-full bg-[#262626] text-xs font-bold text-white flex-shrink-0 group-hover:bg-white group-hover:text-black transition-colors">
-                  {s.price}
-                </span>
-                </div>
-              </button>
-            ))}
+              );
+            })}
           </div>
         )}
 
-        {activeTab === 'servicos' && banners.some((banner) => banner.position === 'below-categories') && <div className="no-scrollbar flex gap-3 overflow-x-auto px-4 pb-4">{banners.filter((banner) => banner.position === 'below-categories').map((banner) => <div key={banner.id} className="relative h-28 min-w-[300px] overflow-hidden rounded-2xl border border-white/10 bg-[#161616] p-4">{banner.image && <img src={banner.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-50" />}<div className="relative z-10"><b className="block text-sm text-white">{banner.title}</b><span className="text-xs text-white/70">{banner.sub}</span></div></div>)}</div>}
+        {activeTab === 'servicos' && banners.some((banner) => banner.position === 'below-categories') && <div className="no-scrollbar flex gap-3 overflow-x-auto px-4 pb-4">{banners.filter((banner) => banner.position === 'below-categories').map(renderBanner)}</div>}
         {activeTab === 'servicos' && promoVideos.length > 0 && profile.videoCarouselPosition !== 'above-tabs' && <div className="no-scrollbar flex gap-3 overflow-x-auto px-4 pb-4">{promoVideos.map((video) => <video key={video.id} src={video.url} controls muted playsInline className="h-[300px] w-[200px] flex-none rounded-2xl object-cover" />)}</div>}
 
         {/* TAB 2: SOBRE MIM (Sobre mim + Localização embed + Contatos unificados) */}
