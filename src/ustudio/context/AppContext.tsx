@@ -61,6 +61,7 @@ interface AppContextType {
   deleteService: (id: string) => void;
   saveProfile: (p: Partial<Profile>) => void;
   addBanner: (b: Omit<Banner, 'id'>) => void;
+  updateBanner: (b: Banner) => void;
   removeBanner: (id: string) => void;
   saveWorkingHours: (hours: WorkingHours) => void;
   savePaymentConfig: (cfg: PaymentConfig) => void;
@@ -402,6 +403,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Banner removido');
   };
 
+  const updateBanner = (banner: Banner) => {
+    setBanners((prev) => prev.map((item) => item.id === banner.id ? banner : item));
+    showToast('Posição do banner atualizada');
+  };
+
   const saveWorkingHours = (hours: WorkingHours) => {
     setWorkingHours(hours);
     setIsHoursConfigOpen(false);
@@ -459,6 +465,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteService,
         saveProfile,
         addBanner,
+        updateBanner,
         removeBanner,
         saveWorkingHours,
         savePaymentConfig,
