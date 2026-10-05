@@ -14,6 +14,7 @@ import {
   MapPin,
   Phone,
   Mail,
+  Instagram,
 } from 'lucide-react';
 
 const DOWS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -43,6 +44,9 @@ export const PublicStorefront: React.FC = () => {
   const cover = profile.cover || '';
   const coverType = profile.coverType || 'image';
   const avatar = profile.avatar || '';
+  const serviceDisplay = profile.serviceDisplay || 'list';
+  const banners = useApp().banners;
+  const promoVideos = profile.promoVideos || [];
 
   // Tabs state (servicos, sobre mim com localização e contato unificados, pagamento)
   const [activeTab, setActiveTab] = useState<'servicos' | 'sobre' | 'pagamento'>('servicos');
@@ -296,8 +300,7 @@ export const PublicStorefront: React.FC = () => {
               </div>
             )}
 
-            {/* Base Dark Overlay for high contrast */}
-            <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+            <div className="absolute inset-x-0 bottom-0 pointer-events-none bg-gradient-to-t from-black to-transparent" style={{ height: `${profile.coverOverlayHeight ?? 70}%`, opacity: (profile.coverOverlayIntensity ?? 50) / 100 }} />
 
             {/* Directional Gradient Overlay */}
             <div
@@ -462,6 +465,14 @@ export const PublicStorefront: React.FC = () => {
           </div>
         )}
 
+        {banners.some((banner) => (banner.position || 'above-tabs') === 'above-tabs') && <div className="no-scrollbar mt-4 flex gap-3 overflow-x-auto px-4">
+          {banners.filter((banner) => (banner.position || 'above-tabs') === 'above-tabs').map((banner) => <div key={banner.id} className="relative h-28 min-w-[300px] overflow-hidden rounded-2xl border border-white/10 bg-[#161616] p-4">
+            {banner.image && <img src={banner.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-50" />}<div className="relative z-10"><span className="text-[10px] font-bold uppercase text-white/70">{banner.kicker}</span><b className="mt-1 block text-sm text-white">{banner.title}</b><span className="text-xs text-white/70">{banner.sub}</span></div>
+          </div>)}
+        </div>}
+
+        {promoVideos.length > 0 && profile.videoCarouselPosition === 'above-tabs' && <div className="no-scrollbar mt-4 flex gap-3 overflow-x-auto px-4">{promoVideos.map((video) => <video key={video.id} src={video.url} controls muted playsInline className="h-[300px] w-[200px] flex-none rounded-2xl object-cover" />)}</div>}
+
         {/* TABS HEADER */}
         <div className="flex border-b border-white/10 px-4 mt-5">
           {[
@@ -486,27 +497,34 @@ export const PublicStorefront: React.FC = () => {
 
         {/* TAB 1: SERVIÇOS */}
         {activeTab === 'servicos' && (
-          <div className="p-4 space-y-2.5">
+          <div className={serviceDisplay === 'cards' ? 'grid grid-cols-2 gap-3 p-4' : 'p-4 space-y-2.5'}>
             {services.map((s) => (
               <button
                 key={s.id}
                 type="button"
                 onClick={() => openBookingFor(s)}
-                className="w-full p-4 rounded-2xl bg-[#161616] border border-white/10 hover:bg-[#1e1e1e] hover:border-white/25 transition-all text-left flex items-center justify-between gap-3 group"
+                className={serviceDisplay === 'cards' ? 'overflow-hidden rounded-2xl bg-[#161616] border border-white/10 text-left group' : 'w-full p-3 rounded-2xl bg-[#161616] border border-white/10 hover:bg-[#1e1e1e] hover:border-white/25 transition-all text-left flex items-center gap-3 group'}
               >
+                {s.image ? <img src={s.image} alt="" className={serviceDisplay === 'cards' ? 'h-28 w-full object-cover' : 'h-14 w-14 flex-none rounded-xl object-cover'} /> : <span className={serviceDisplay === 'cards' ? 'flex h-28 w-full items-center justify-center bg-[#202020] text-2xl' : 'flex h-14 w-14 flex-none items-center justify-center rounded-xl bg-[#202020] text-lg'}>{s.emoji || '✂️'}</span>}
+                <div className={serviceDisplay === 'cards' ? 'p-3' : 'contents'}>
                 <div className="min-w-0 flex-1">
                   <b className="text-sm font-bold text-white block group-hover:text-rose-400 transition-colors">
                     {s.name}
                   </b>
                   <span className="text-xs text-white/50 block mt-0.5">{s.duration}</span>
+                  {serviceDisplay === 'list' && s.desc && <span className="mt-0.5 line-clamp-1 block text-[10px] text-white/35">{s.desc}</span>}
                 </div>
                 <span className="px-3.5 py-1.5 rounded-full bg-[#262626] text-xs font-bold text-white flex-shrink-0 group-hover:bg-white group-hover:text-black transition-colors">
                   {s.price}
                 </span>
+                </div>
               </button>
             ))}
           </div>
         )}
+
+        {activeTab === 'servicos' && banners.some((banner) => banner.position === 'below-categories') && <div className="no-scrollbar flex gap-3 overflow-x-auto px-4 pb-4">{banners.filter((banner) => banner.position === 'below-categories').map((banner) => <div key={banner.id} className="relative h-28 min-w-[300px] overflow-hidden rounded-2xl border border-white/10 bg-[#161616] p-4">{banner.image && <img src={banner.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-50" />}<div className="relative z-10"><b className="block text-sm text-white">{banner.title}</b><span className="text-xs text-white/70">{banner.sub}</span></div></div>)}</div>}
+        {activeTab === 'servicos' && promoVideos.length > 0 && profile.videoCarouselPosition !== 'above-tabs' && <div className="no-scrollbar flex gap-3 overflow-x-auto px-4 pb-4">{promoVideos.map((video) => <video key={video.id} src={video.url} controls muted playsInline className="h-[300px] w-[200px] flex-none rounded-2xl object-cover" />)}</div>}
 
         {/* TAB 2: SOBRE MIM (Sobre mim + Localização embed + Contatos unificados) */}
         {activeTab === 'sobre' && (
@@ -594,7 +612,7 @@ export const PublicStorefront: React.FC = () => {
                     className="p-3.5 rounded-2xl bg-[#1e1e1e] border border-white/10 flex items-center justify-between text-white hover:bg-[#262626] transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                       <div className="w-8 h-8 flex items-center justify-center text-white/60">
                         <Phone className="w-4 h-4 stroke-[1.5]" />
                       </div>
                       <div>
@@ -614,8 +632,8 @@ export const PublicStorefront: React.FC = () => {
                     className="p-3.5 rounded-2xl bg-[#1e1e1e] border border-white/10 flex items-center justify-between text-white hover:bg-[#262626] transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400 font-bold text-xs">
-                        IG
+                       <div className="w-8 h-8 flex items-center justify-center text-white/60">
+                         <Instagram className="w-4 h-4 stroke-[1.5]" />
                       </div>
                       <div>
                         <b className="block font-bold text-xs">Instagram</b>
@@ -632,7 +650,7 @@ export const PublicStorefront: React.FC = () => {
                     className="p-3.5 rounded-2xl bg-[#1e1e1e] border border-white/10 flex items-center justify-between text-white hover:bg-[#262626] transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                       <div className="w-8 h-8 flex items-center justify-center text-white/60">
                         <Mail className="w-4 h-4 stroke-[1.5]" />
                       </div>
                       <div>
@@ -759,16 +777,6 @@ export const PublicStorefront: React.FC = () => {
           </div>
         )}
 
-        {/* BOTTOM FIXED CTA: AGENDAR HORÁRIO */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/90 to-transparent flex justify-center z-40">
-          <button
-            type="button"
-            onClick={() => openBookingFor()}
-            className="w-full max-w-[398px] py-4 rounded-full bg-white text-black font-extrabold text-sm shadow-2xl hover:bg-white/95 active:scale-98 transition-transform"
-          >
-            Agendar horário
-          </button>
-        </div>
       </div>
 
       {/* ================= MODAL: AVALIAR NO GOOGLE ================= */}

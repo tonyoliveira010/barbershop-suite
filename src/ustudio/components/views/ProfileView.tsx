@@ -171,8 +171,10 @@ export const ProfileView: React.FC = () => {
             </div>
           ) : null}
 
-          {/* Base Dark Overlay for high contrast */}
-          <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+          <div
+            className="absolute inset-x-0 bottom-0 pointer-events-none bg-gradient-to-t from-black to-transparent"
+            style={{ height: `${profile.coverOverlayHeight ?? 70}%`, opacity: (profile.coverOverlayIntensity ?? 50) / 100 }}
+          />
 
           {/* Directional Gradient Overlay */}
           <div
@@ -370,17 +372,6 @@ export const ProfileView: React.FC = () => {
           </button>
         </div>
       </div>
-
-      {/* Layout Format Selection */}
-      <section className="px-5 space-y-3">
-        <div>
-          <h3 className="text-sm font-bold text-white tracking-tight">Formato da página pública</h3>
-          <p className="text-xs text-white/50">Personalize o layout visual que suas clientes verão</p>
-        </div>
-
-        {/* Live Format Selector: immediately updates head above */}
-        <PageFormatSelector showSectionHeader={false} />
-      </section>
 
       <PublicPagePreferences />
 
