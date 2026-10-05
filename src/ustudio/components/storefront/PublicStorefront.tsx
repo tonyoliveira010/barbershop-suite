@@ -14,7 +14,7 @@ import {
   MapPin,
   Phone,
   Mail,
-  Instagram,
+  AtSign,
 } from 'lucide-react';
 
 const DOWS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -633,7 +633,7 @@ export const PublicStorefront: React.FC = () => {
                   >
                     <div className="flex items-center gap-3">
                        <div className="w-8 h-8 flex items-center justify-center text-white/60">
-                         <Instagram className="w-4 h-4 stroke-[1.5]" />
+                         <AtSign className="w-4 h-4 stroke-[1.5]" />
                       </div>
                       <div>
                         <b className="block font-bold text-xs">Instagram</b>

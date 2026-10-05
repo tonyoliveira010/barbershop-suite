@@ -1,6 +1,6 @@
 // @ts-nocheck -- ported app uses browser-only state
 import React, { useState } from 'react';
-import { CalendarDays, Check, ChevronLeft, ChevronRight, Scissors, Store, TrendingUp } from 'lucide-react';
+import { CalendarDays, Check, ChevronLeft, ChevronRight, CreditCard, Gift, Package, Scissors, Store, TrendingUp } from 'lucide-react';
 
 const steps = [
   {
@@ -18,18 +18,32 @@ const steps = [
     points: ['Escolha o formato dos serviços', 'Personalize capa, contatos e localização'],
   },
   {
-    kicker: 'Agenda',
-    title: 'Tenha o dia sob controle',
-    text: 'Veja os próximos clientes, horários livres e detalhes de cada atendimento.',
-    icon: CalendarDays,
-    points: ['Acompanhe a fila de hoje', 'Reagende ou bloqueie horários rapidamente'],
+    kicker: 'Serviços e produtos',
+    title: 'Organize seu catálogo',
+    text: 'Cadastre cortes, barba, combos e produtos com preço, duração, foto e descrição.',
+    icon: Package,
+    points: ['Separe serviços e produtos', 'Edite preços sempre que precisar'],
   },
   {
-    kicker: 'Resultados',
-    title: 'Entenda o seu movimento',
-    text: 'Acompanhe atendimentos e receitas para tomar decisões melhores na barbearia.',
-    icon: TrendingUp,
-    points: ['Visualize os principais números', 'Descubra os serviços mais procurados'],
+    kicker: 'Agendamento online',
+    title: 'Transforme visitas em horários',
+    text: 'Cada serviço da sua vitrine abre um fluxo simples para o cliente escolher dia e hora.',
+    icon: CalendarDays,
+    points: ['Defina antecedência e intervalos', 'Receba os dados do cliente organizados'],
+  },
+  {
+    kicker: 'Financeiro',
+    title: 'Acompanhe cada resultado',
+    text: 'Veja faturamento, atendimentos e ticket médio em períodos diferentes.',
+    icon: CreditCard,
+    points: ['Compare o movimento da barbearia', 'Identifique os serviços mais procurados'],
+  },
+  {
+    kicker: 'Indicações',
+    title: 'Cresça com sua rede',
+    text: 'Prepare sua presença digital para compartilhar a barbearia e conquistar novos clientes.',
+    icon: Gift,
+    points: ['Compartilhe seu link público', 'Divulgue promoções e novidades'],
   },
 ];
 
@@ -73,6 +87,7 @@ export const PlatformOnboarding: React.FC = () => {
               <Icon className="h-6 w-6 stroke-[1.8]" />
             </span>
           </div>
+          <div className="mb-2 flex items-center justify-between"><span className="text-[10px] font-semibold text-white/35">{step + 1} de {steps.length}</span>{step === steps.length - 1 && <span className="text-[10px] font-semibold text-emerald-400">Pronto para começar</span>}</div>
           <h3 className="text-lg font-bold text-white">{current.title}</h3>
           <p className="mt-1 text-xs leading-relaxed text-white/55">{current.text}</p>
           <div className="mt-3 space-y-2">
@@ -83,6 +98,7 @@ export const PlatformOnboarding: React.FC = () => {
               </div>
             ))}
           </div>
+          {step === steps.length - 1 && <div className="mt-4 rounded-xl border border-white/10 bg-[#0d0d0d] p-3"><b className="mb-2 block text-[11px] text-white">Primeiros passos</b>{['Atualizar perfil e capa', 'Cadastrar os serviços', 'Configurar horários', 'Compartilhar a página'].map((item) => <div key={item} className="flex items-center gap-2 py-1 text-[11px] text-white/55"><span className="h-3.5 w-3.5 rounded border border-white/20" />{item}</div>)}</div>}
         </div>
 
         <div className="flex items-center gap-3 border-t border-white/10 px-4 py-3">
