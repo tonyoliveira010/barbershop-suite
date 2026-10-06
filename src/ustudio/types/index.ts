@@ -12,6 +12,7 @@ export interface Client {
   status: 'Confirmado' | 'Pendente' | 'Concluído' | 'Cancelado';
   time: string;
   notes?: string;
+  date?: string;
 }
 
 export interface Category {
@@ -41,12 +42,16 @@ export interface DayScheduleSlot {
   type: 'client' | 'free' | 'blocked';
   id?: string;
   blockedReason?: string;
+  date?: string;
+  durationMinutes?: number;
 }
 
 export interface WorkingHours {
   days: string[];
   start: string;
   end: string;
+  overrides?: Record<string, { start: string; end: string }>;
+  blockedDates?: string[];
 }
 
 export interface PaymentConfig {
@@ -87,6 +92,7 @@ export interface Profile {
   coverOverlayIntensity?: number;
   bannerPosition?: 'above-tabs' | 'below-categories';
   videoCarouselPosition?: 'above-tabs' | 'below-categories';
+  catalogDemo?: boolean;
   promoVideos?: Array<{ id: string; url: string; name: string }>;
 
   // Storefront specific config
@@ -115,5 +121,5 @@ export interface Banner {
   sub: string;
   emoji?: string;
   image?: string;
-  position?: 'above-tabs' | 'below-categories';
+  position?: string;
 }

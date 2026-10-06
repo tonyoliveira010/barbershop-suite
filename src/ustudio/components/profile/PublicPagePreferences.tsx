@@ -13,7 +13,7 @@ const PositionSelector = ({ value, onChange }) => (
   </div>
 );
 
-const UpgradeBadge = () => <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-1 text-[10px] font-bold text-amber-300"><LockKeyhole className="h-3 w-3" /> R$ 7,90</span>;
+const UpgradeBadge = ({ price = "7,90" }) => <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-1 text-[10px] font-bold text-amber-300"><LockKeyhole className="h-3 w-3" /> R$ {price}/mês</span>;
 
 export const PublicPagePreferences: React.FC = () => {
   const { profile, saveProfile, setIsBannerModalOpen, showToast } = useApp();
@@ -47,7 +47,7 @@ export const PublicPagePreferences: React.FC = () => {
         const Icon = card.icon;
         return <button key={card.id} type="button" onClick={() => card.id === 'banners' ? setIsBannerModalOpen(true) : setEditor(card.id as Editor)} className="flex w-full items-center gap-3.5 rounded-2xl border border-white/[0.06] bg-[#141414] p-3.5 text-left hover:border-white/15 hover:bg-[#1a1a1a]">
           <span className="flex h-8 w-8 flex-none items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.03] text-white/70"><Icon className="h-3.5 w-3.5" /></span>
-          <span className="min-w-0 flex-1"><span className="flex items-center gap-2"><b className="truncate text-xs text-white">{card.title}</b>{card.premium && <UpgradeBadge />}</span><span className="mt-0.5 block truncate text-[11.5px] text-white/45">{card.detail}</span></span>
+          <span className="min-w-0 flex-1"><span className="flex items-center gap-2"><b className="truncate text-xs text-white">{card.title}</b>{card.premium && <UpgradeBadge price={card.id === "banners" ? "4,90" : "7,90"} />}</span><span className="mt-0.5 block truncate text-[11.5px] text-white/45">{card.detail}</span></span>
           <ChevronRight className="h-3.5 w-3.5 text-white/20" />
         </button>;
       })}

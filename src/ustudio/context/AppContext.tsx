@@ -1,4 +1,5 @@
 // @ts-nocheck -- ported as-is from the original AI Studio project
+import { availableSlots, localDate, durationMinutes } from '../utils/availability';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   Client,
@@ -27,6 +28,7 @@ interface AppContextType {
   // Data State
   clients: Client[];
   categories: Category[];
+  addCategory: (label: string) => string;
   services: ServiceItem[];
   daySchedule: DayScheduleSlot[];
   profile: Profile;
@@ -47,6 +49,7 @@ interface AppContextType {
     phone: string;
     time: string;
     serviceName: string;
+    date?: string;
     vip?: boolean;
     dob?: string;
     notes?: string;
@@ -120,7 +123,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   });
 
-  const [categories] = useState<Category[]>(INITIAL_CATEGORIES);
+  const [categories, setCategories] = useState<Category[]>(() => {
+    try { return JSON.parse(localStorage.getItem('studiolite_categories') || 'null') || INITIAL_CATEGORIES; } catch { return INITIAL_CATEGORIES; }
+  });
+  useEffect(() => { localStorage.setItem('studiolite_categories', JSON.stringify(categories)); }, [categories]);
+  const addCategory = (label: string) => {
+    const existing = categories.find(c => c.label.toLowerCase() === label.trim().toLowerCase());
+    if (existing) return existing.key;
+    const key = 'cat_' + Date.now().toString(36);
+    setCategories(prev => [...prev, { key, label: label.trim(), iconName: 'Scissors', soft: 'var(--studio-surface)' }]);
+    return key;
+  };
 
   const [services, setServices] = useState<ServiceItem[]>(() => {
     try {
@@ -250,6 +263,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     phone: string;
     time: string;
     serviceName: string;
+    date?: string;
     vip?: boolean;
     dob?: string;
     notes?: string;
@@ -257,6 +271,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newId = 'c_' + Date.now().toString(36);
     const targetService = services.find((s) => s.name === data.serviceName);
 
+    const date = data.date || localDate();
+    if (data.date && !availableSlots(date, durationMinutes(targetService?.duration), workingHours, bookingSettings, daySchedule).includes(data.time)) {
+      showToast('Este horário não está mais disponível. Escolha outro.');
+      return false;
+    }
     const newClient: Client = {
       id: newId,
       name: data.name,
@@ -268,7 +287,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       duration: targetService?.duration || '45 min',
       price: targetService?.price || 'R$ 120',
       status: 'Confirmado',
-      time: `Hoje, ${data.time}`,
+      date,
+      time: `${date === localDate() ? "Hoje" : date}, ${data.time}`,
       notes: data.notes || '',
     };
 
@@ -276,16 +296,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Update schedule
     setDaySchedule((prev) => {
-      const existing = prev.find((s) => s.time === data.time);
+      const existing = prev.find((s) => s.time === data.time && (s.date || localDate()) === date);
       if (existing) {
-        return prev.map((s) => (s.time === data.time ? { ...s, type: 'client' as const, id: newId } : s));
+        return prev.map((s) => (s.time === data.time && (s.date || localDate()) === date ? { ...s, date, durationMinutes: durationMinutes(targetService?.duration), type: 'client' as const, id: newId } : s));
       }
-      return [...prev, { time: data.time, type: 'client' as const, id: newId }].sort((a, b) =>
+      return [...prev, { time: data.time, date, durationMinutes: durationMinutes(targetService?.duration), type: 'client' as const, id: newId }].sort((a, b) =>
         a.time.localeCompare(b.time)
       );
     });
 
     showToast(`Agendamento de ${data.name} confirmado às ${data.time}`);
+    return true;
   };
 
   const updateClient = (updated: Client) => {
@@ -360,6 +381,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const saveService = (item: ServiceItem) => {
+    if (item.type === 'produto' && !profile.catalogDemo) { showToast('Abra Catálogo e ative a demonstração do upgrade de R$ 12,90/mês.'); return; }
+    if (item.type === 'produto' && services.filter(s => s.type === 'produto' && s.id !== item.id).length >= 10) { showToast('O catálogo permite até 10 produtos.'); return; }
     setServices((prev) => {
       const exists = prev.some((s) => s.id === item.id);
       if (exists) {
@@ -443,6 +466,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       value={{
         clients,
         categories,
+        addCategory,
         services,
         daySchedule,
         profile,

@@ -27,10 +27,10 @@ export const BookingConfigModal: React.FC = () => {
       bufferMinutes,
       freeCancellationHours,
       requireWhatsapp,
-      autoWhatsappNotification,
-      firstVisitDiscount,
-      activeCoupon: activeCoupon.trim().toUpperCase(),
-      requireDeposit,
+      autoWhatsappNotification: false,
+      firstVisitDiscount: 0,
+      activeCoupon: '',
+      requireDeposit: false,
       depositPercent,
       allowPayOnSite,
     });
@@ -176,7 +176,7 @@ export const BookingConfigModal: React.FC = () => {
               </div>
               <input
                 type="checkbox"
-                checked={autoWhatsappNotification}
+                disabled checked={false}
                 onChange={(e) => setAutoWhatsappNotification(e.target.checked)}
                 className="w-4 h-4 rounded accent-white"
               />
@@ -185,7 +185,7 @@ export const BookingConfigModal: React.FC = () => {
         )}
 
         {/* Tab 3: Cupons */}
-        {activeTab === 'cupons' && (
+        {false && activeTab === 'cupons' && (
           <div className="space-y-3.5 text-xs">
             <div className="p-3.5 rounded-2xl bg-[#1e1e1e] space-y-1.5">
               <label className="text-xs font-bold text-white block">
@@ -219,8 +219,9 @@ export const BookingConfigModal: React.FC = () => {
           </div>
         )}
 
+        {(activeTab === 'cupons' || activeTab === 'pagamento') && <div className="py-8 text-center text-sm text-muted-foreground"><b className="text-foreground">Em breve</b><p className="mt-2">Cupons, sinal e pagamentos integrados ainda não estão disponíveis.</p></div>}
         {/* Tab 4: Pagamento */}
-        {activeTab === 'pagamento' && (
+        {false && activeTab === 'pagamento' && (
           <div className="space-y-3 text-xs">
             <label className="flex items-center justify-between p-3.5 rounded-2xl bg-[#1e1e1e] cursor-pointer">
               <div>

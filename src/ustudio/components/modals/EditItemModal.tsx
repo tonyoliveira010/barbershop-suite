@@ -2,12 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { ServiceItem } from '../../types';
-import { X, Calendar, ShoppingCart, Trash2 } from 'lucide-react';
+import { X, Calendar, ShoppingCart, Trash2, ImagePlus } from 'lucide-react';
 
-const EMOJI_OPTIONS = ['💆', '✂️', '🤲', '✨', '💇', '💅', '🧴', '🌸', '💄', '🧖', '🔥', '💉', '🎁'];
+
 
 export const EditItemModal: React.FC = () => {
-  const { editingService, setEditingService, categories, saveService, deleteService } = useApp();
+  const { editingService, setEditingService, categories, addCategory, services, saveService, deleteService, showToast } = useApp();
 
   const [name, setName] = useState('');
   const [cat, setCat] = useState('facial');
@@ -38,7 +38,7 @@ export const EditItemModal: React.FC = () => {
       setPrice('R$ 120');
       setDesc('');
       setBadge('');
-      setType('servico');
+      setType(editingService?.defaultType || 'servico');
       setSelectedEmoji('💆');
       setImageUrl('');
     }
@@ -60,7 +60,7 @@ export const EditItemModal: React.FC = () => {
       desc: desc.trim(),
       badge: badge.trim() || null,
       type,
-      emoji: selectedEmoji,
+      emoji: undefined,
       image: imageUrl.trim() || undefined,
     };
 
@@ -101,7 +101,7 @@ export const EditItemModal: React.FC = () => {
               : `linear-gradient(135deg, ${currentCategory.soft} 0%, rgba(22,22,22,0.9) 100%)`,
           }}
         >
-          {!imageUrl && <span>{selectedEmoji}</span>}
+          {!imageUrl && <ImagePlus className="h-8 w-8 text-muted-foreground" />}
           {badge && (
             <span className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#ff5f8a] text-white">
               {badge}
@@ -109,29 +109,19 @@ export const EditItemModal: React.FC = () => {
           )}
         </div>
 
-        {/* Emoji Swatches */}
-        <div className="flex gap-1.5 overflow-x-auto pb-3 mb-2 no-scrollbar">
-          {EMOJI_OPTIONS.map((em) => (
-            <button
-              key={em}
-              type="button"
-              onClick={() => setSelectedEmoji(em)}
-              className={`w-9 h-9 rounded-full flex items-center justify-center text-base flex-shrink-0 transition-all ${
-                selectedEmoji === em
-                  ? 'bg-white text-black scale-110 shadow-md'
-                  : 'bg-[#1e1e1e] border border-white/10 text-white/80 hover:bg-[#262626]'
-              }`}
-            >
-              {em}
-            </button>
-          ))}
-        </div>
-
+        <label className="mb-4 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-border p-3 text-sm text-foreground">
+          <ImagePlus className="h-4 w-4" /> Enviar foto
+          <input type="file" accept="image/*" className="hidden" onChange={event => {
+            const file = event.target.files?.[0]; if (!file) return;
+            if (file.size > 2 * 1024 * 1024) return showToast('Escolha uma foto de até 2 MB.');
+            const reader = new FileReader(); reader.onload = () => setImageUrl(String(reader.result)); reader.readAsDataURL(file);
+          }} />
+        </label>
         {/* Form Fields */}
         <div className="space-y-3 text-xs">
           <div>
             <label className="text-[10px] font-bold uppercase tracking-wider text-white/40 block mb-1">
-              Foto URL (opcional)
+              Link da foto (opcional)
             </label>
             <input
               type="url"
@@ -162,9 +152,13 @@ export const EditItemModal: React.FC = () => {
               </label>
               <select
                 value={cat}
-                onChange={(e) => setCat(e.target.value)}
+                onChange={(e) => {
+                  if (e.target.value === '__new') { const label = window.prompt('Nome da nova categoria'); if (label?.trim()) setCat(addCategory(label)); }
+                  else setCat(e.target.value);
+                }}
                 className="w-full px-3 py-2.5 rounded-xl bg-[#1e1e1e] border border-white/10 text-white focus:outline-none focus:border-white/40"
               >
+                <option value="__new">+ Criar categoria</option>
                 {categories.map((c) => (
                   <option key={c.key} value={c.key}>
                     {c.label}
@@ -206,18 +200,8 @@ export const EditItemModal: React.FC = () => {
               <label className="text-[10px] font-bold uppercase tracking-wider text-white/40 block mb-1">
                 Destaque / Selo
               </label>
-              <select
-                value={badge}
-                onChange={(e) => setBadge(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl bg-[#1e1e1e] border border-white/10 text-white focus:outline-none focus:border-white/40"
-              >
-                <option value="">Nenhum</option>
-                <option value="Mais pedido">Mais pedido</option>
-                <option value="Novo">Novo</option>
-                <option value="Favorito">Favorito</option>
-                <option value="Mais vendido">Mais vendido</option>
-                <option value="Recomendado">Recomendado</option>
-              </select>
+              <input value={badge} onChange={e => setBadge(e.target.value)} list="studio-badges" placeholder="Escolher ou criar selo" className="w-full rounded-xl border border-border bg-secondary px-3 py-2.5 text-foreground" />
+              <datalist id="studio-badges">{Array.from(new Set(['Mais pedido', 'Novo', 'Favorito', ...services.map(s => s.badge).filter(Boolean)])).map(value => <option key={value} value={value} />)}</datalist>
             </div>
           </div>
 
@@ -258,7 +242,7 @@ export const EditItemModal: React.FC = () => {
                 }`}
               >
                 <ShoppingCart className="w-3.5 h-3.5" />
-                <span>Checkout (Produto)</span>
+                <span>Reserva (Produto)</span>
               </button>
             </div>
           </div>
@@ -269,7 +253,7 @@ export const EditItemModal: React.FC = () => {
           {!editingService.isNew && editingService.item && (
             <button
               type="button"
-              onClick={() => deleteService(editingService.item!.id)}
+              onClick={() => deleteService(editingService.item?.id)}
               className="w-11 h-11 rounded-full bg-rose-950/40 text-rose-400 border border-rose-500/20 flex items-center justify-center hover:bg-rose-900/50 transition-colors flex-shrink-0"
               title="Excluir item"
             >
