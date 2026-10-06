@@ -6,14 +6,14 @@ import { X, Megaphone, ImagePlus, Trash2 } from 'lucide-react';
 const BANNER_EMOJIS = ['🎁', '📅', '🔥', '✨', '🌸', '⚡', '👑', '🎉'];
 
 export const BannerFormModal: React.FC = () => {
-  const { isBannerModalOpen, setIsBannerModalOpen, addBanner, banners, updateBanner, removeBanner } = useApp();
+  const { isBannerModalOpen, setIsBannerModalOpen, addBanner, categories, banners, updateBanner, removeBanner } = useApp();
 
   const [kicker, setKicker] = useState('Promoção');
   const [title, setTitle] = useState('');
   const [sub, setSub] = useState('');
   const [emoji, setEmoji] = useState('🎁');
   const [image, setImage] = useState('');
-  const [position, setPosition] = useState<'above-tabs' | 'below-categories'>('above-tabs');
+  const [position, setPosition] = useState<string>('above-tabs');
   const imageRef = useRef<HTMLInputElement>(null);
 
   if (!isBannerModalOpen) return null;
@@ -57,7 +57,7 @@ export const BannerFormModal: React.FC = () => {
         <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
           <div className="flex items-center gap-2">
             <Megaphone className="w-4 h-4 text-[#ffb020]" />
-            <h3 className="text-base font-bold text-white">Novo banner promocional</h3>
+            <h3 className="text-base font-bold text-white">Banners · R$ 4,90/mês</h3>
           </div>
           <button
             onClick={() => setIsBannerModalOpen(false)}
@@ -79,7 +79,7 @@ export const BannerFormModal: React.FC = () => {
           <div>
             <label className="text-[10px] font-bold uppercase tracking-wider text-white/40 block mb-1.5">Posição deste banner</label>
             <div className="grid grid-cols-2 gap-1 rounded-xl bg-[#1e1e1e] p-1">
-              {[['above-tabs', 'Acima das abas'], ['below-categories', 'Abaixo das categorias']].map(([value, label]) => (
+              {[['above-tabs', 'Acima das abas'], ['below-categories', 'Abaixo das categorias'], ...categories.map(cat => ['after:' + cat.key, 'Após ' + cat.label])].map(([value, label]) => (
                 <button key={value} type="button" onClick={() => setPosition(value as any)} className={`rounded-lg px-2 py-2 text-[10px] font-semibold ${position === value ? 'bg-white text-black' : 'text-white/50'}`}>{label}</button>
               ))}
             </div>
@@ -180,6 +180,7 @@ export const BannerFormModal: React.FC = () => {
                 <select value={banner.position || 'above-tabs'} onChange={(event) => updateBanner({ ...banner, position: event.target.value as any })} className="w-full rounded-lg border border-white/10 bg-[#141414] px-2 py-2 text-[11px] text-white">
                   <option value="above-tabs">Acima das abas</option>
                   <option value="below-categories">Abaixo das categorias</option>
+                  {categories.map(cat => <option key={cat.key} value={"after:" + cat.key}>Após {cat.label}</option>)}
                 </select>
               </div>
             ))}

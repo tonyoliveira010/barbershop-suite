@@ -60,7 +60,7 @@ export const ProfileView: React.FC = () => {
       if (typeof reader.result === 'string') {
         saveProfile({
           cover: reader.result,
-          coverType: 'image',
+          coverType: f.type.startsWith('video/') ? 'video' : 'image',
           customCoverUrl: reader.result,
         });
         showToast('Foto da capa atualizada com sucesso!');
@@ -124,7 +124,7 @@ export const ProfileView: React.FC = () => {
       <input
         ref={fileCoverRef}
         type="file"
-        accept="image/*"
+        accept="image/*,video/*"
         className="hidden"
         onChange={handleCoverUpload}
       />
@@ -430,7 +430,7 @@ export const ProfileView: React.FC = () => {
             <ChevronRight className="w-3.5 h-3.5 text-white/20 group-hover:text-white/60 transition-colors" />
           </button>
 
-          {/* 2. Agendamento online (InfinitePay) */}
+          {/* 2. InfinitePay · Em breve */}
           <button
             type="button"
             onClick={() => setActiveDataModal('infinitepay')}
@@ -440,9 +440,9 @@ export const ProfileView: React.FC = () => {
               <ShieldCheck className="w-3.5 h-3.5 stroke-[1.25]" />
             </div>
             <div className="flex-1 min-w-0">
-              <b className="text-xs font-semibold text-white block truncate">Agendamento online (InfinitePay)</b>
+              <b className="text-xs font-semibold text-white block truncate">InfinitePay · Em breve</b>
               <span className="text-[11.5px] text-white/45 block truncate mt-0.5 font-mono">
-                {profile.apiUrl || 'https://api.seudominio.com'}
+                Integração de pagamentos indisponível
               </span>
             </div>
             <ChevronRight className="w-3.5 h-3.5 text-white/20 group-hover:text-white/60 transition-colors" />

@@ -17,6 +17,8 @@ export const ProfileEditModal: React.FC = () => {
   const [handle, setHandle] = useState(profile.handle);
   const [bio, setBio] = useState(profile.bio);
   const [about, setAbout] = useState(profile.about);
+  const [title, setTitle] = useState(profile.title);
+  const [sub, setSub] = useState(profile.sub);
 
   const fileCoverRef = useRef<HTMLInputElement>(null);
   const fileAvatarRef = useRef<HTMLInputElement>(null);
@@ -72,6 +74,8 @@ export const ProfileEditModal: React.FC = () => {
       saveProfile({
         coverIndex: coverIdx,
         customCoverUrl: customCover.trim() || undefined,
+        cover: customCover.trim(),
+        coverType: customCover.startsWith('data:video/') ? 'video' : 'image',
       });
     } else if (profileEditField === 'avatar') {
       saveProfile({
@@ -83,6 +87,8 @@ export const ProfileEditModal: React.FC = () => {
         name: name.trim() || profile.name,
         handle: handle.trim().startsWith('@') ? handle.trim() : `@${handle.trim()}`,
         bio: bio.trim(),
+        title: title.trim(),
+        sub: sub.trim(),
       });
     } else if (profileEditField === 'about') {
       saveProfile({
@@ -118,7 +124,7 @@ export const ProfileEditModal: React.FC = () => {
             <input
               ref={fileCoverRef}
               type="file"
-              accept="image/*"
+              accept="image/*,video/*"
               className="hidden"
               onChange={handleModalCoverUpload}
             />
@@ -132,11 +138,11 @@ export const ProfileEditModal: React.FC = () => {
                 className="w-full py-3 rounded-2xl bg-[#1e1e1e] hover:bg-[#262626] border border-white/15 text-white font-semibold flex items-center justify-center gap-2 transition-colors"
               >
                 <Camera className="w-4 h-4 text-[#2f7dff]" />
-                <span>Escolher foto da galeria ou câmera</span>
+                <span>Escolher foto ou vídeo</span>
               </button>
               {customCover && (
                 <div className="mt-2.5 h-20 rounded-xl overflow-hidden border border-white/10 relative">
-                  <img src={customCover} alt="Prévia da capa" className="w-full h-full object-cover" />
+                  {customCover.startsWith("data:video/") ? <video src={customCover} muted controls className="w-full h-full object-cover" /> : <img src={customCover} alt="Prévia da capa" className="w-full h-full object-cover" />}
                   <span className="absolute bottom-1 right-2 text-[10px] text-white/70 bg-black/60 px-1.5 py-0.5 rounded">
                     Foto selecionada
                   </span>
@@ -257,6 +263,8 @@ export const ProfileEditModal: React.FC = () => {
         {/* NAME & BIO EDIT */}
         {profileEditField === 'name' && (
           <div className="space-y-3 text-xs">
+            <label className="block">Título da página<input value={title} onChange={e => setTitle(e.target.value)} className="mt-1 w-full rounded-xl border border-border bg-secondary p-3 text-foreground" /></label>
+            <label className="block">Subtítulo<input value={sub} onChange={e => setSub(e.target.value)} className="mt-1 w-full rounded-xl border border-border bg-secondary p-3 text-foreground" /></label>
             <div>
               <label className="text-[10px] font-bold uppercase tracking-wider text-white/40 block mb-1">
                 Nome do profissional ou estúdio
