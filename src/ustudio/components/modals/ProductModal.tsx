@@ -13,7 +13,7 @@ export const ProductModal: React.FC = () => {
   const currentCategory = categories.find((c) => c.key === selectedProduct.cat) || categories[0];
 
   const handleAddToCart = () => {
-    showToast(`${qty}x "${selectedProduct.name}" adicionado ao carrinho de vendas ✨`);
+    showToast(`${qty}x "${selectedProduct.name}" reservado para compra no ato`);
     setSelectedProduct(null);
   };
 
@@ -95,7 +95,7 @@ export const ProductModal: React.FC = () => {
           </div>
           <div className="p-2.5 rounded-2xl bg-[#1e1e1e] flex flex-col items-center justify-center text-center gap-1">
             <Package className="w-4 h-4 text-[#2f7dff]" />
-            <span className="text-[10px] font-bold text-white/70">No checkout</span>
+            <span className="text-[10px] font-bold text-white/70">Pagar no ato</span>
           </div>
         </div>
 
@@ -131,7 +131,7 @@ export const ProductModal: React.FC = () => {
           className="w-full py-3.5 rounded-full bg-white hover:bg-white/90 text-black font-bold text-xs flex items-center justify-center gap-2 mb-5 shadow-lg active:scale-98 transition-transform"
         >
           <ShoppingBag className="w-4 h-4" />
-          <span>Adicionar ao carrinho ({qty} un)</span>
+          <span>Reservar para compra ({qty} un)</span>
         </button>
 
         {/* Tabs */}
@@ -169,8 +169,7 @@ export const ProductModal: React.FC = () => {
               {selectedProduct.desc}
               <br />
               <br />
-              Este item pode ser vendido diretamente no seu site público com pagamento via Pix ou
-              cartão de crédito integrado.
+              Este item pode ser reservado para retirada e pagamento no estabelecimento.
             </p>
           )}
 
@@ -186,7 +185,7 @@ export const ProductModal: React.FC = () => {
               </div>
               <div className="flex justify-between py-1 border-b border-white/5">
                 <span className="text-white/40">Integração</span>
-                <span className="text-white font-medium">Checkout Online / Presencial</span>
+                <span className="text-white font-medium">Reserva / Pagamento no ato</span>
               </div>
             </div>
           )}

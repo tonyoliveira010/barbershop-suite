@@ -1,7 +1,7 @@
 // @ts-nocheck -- ported as-is from the original AI Studio project
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { PlatformOnboarding } from '../home/PlatformOnboarding';
+
 import {
   ExternalLink,
   MapPin,
@@ -119,7 +119,10 @@ export const HomeView: React.FC = () => {
         </div>
       </div>
 
-      <PlatformOnboarding />
+      <section className="px-5 space-y-3">
+        <button onClick={() => setActiveTab('dashboard')} className="flex w-full items-center gap-3 rounded-2xl border border-border bg-secondary p-4 text-left"><TrendingUp className="h-5 w-5" /><span><b className="block text-sm">Dashboard financeiro</b><span className="text-xs text-muted-foreground">Faturamento, previsão e ticket médio</span></span><ChevronRight className="ml-auto h-4 w-4" /></button>
+        <button onClick={() => setIsPaymentConfigOpen(true)} className="flex w-full items-center gap-3 rounded-2xl border border-border bg-secondary p-4 text-left"><CreditCard className="h-5 w-5" /><span><b className="block text-sm">Configurar pagamentos · Em breve</b><span className="text-xs text-muted-foreground">InfinitePay e Pix via API</span></span><ChevronRight className="ml-auto h-4 w-4" /></button>
+      </section>
 
       {/* Categorias / Funções da Plataforma (Ícone clean tamanho 70px) */}
       <section className="px-5">
