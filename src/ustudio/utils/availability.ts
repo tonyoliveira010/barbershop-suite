@@ -4,12 +4,12 @@ export const localDate = (date = new Date()) => `${date.getFullYear()}-${String(
 export const durationMinutes = (value = '30 min') => {
   const hours = value.match(/(\d+(?:[.,]\d+)?)\s*h/i);
   const mins = value.match(/(\d+)\s*min/i);
-  return Math.max(1, (hours ? Number(hours[1].replace(',', '.')) * 60 : 0) + (mins ? Number(mins[1]) : hours ? 0 : parseInt(value) || 30));
+  return Math.max(1, (hours ? Number((hours[1] || '0').replace(',', '.')) * 60 : 0) + (mins ? Number(mins[1] || 0) : hours ? 0 : parseInt(value) || 30));
 };
-const minutes = (value: string) => { const [h, m] = value.split(':').map(Number); return h * 60 + m; };
+const minutes = (value: string) => { const [h = 0, m = 0] = value.split(':').map(Number); return h * 60 + m; };
 export function availableSlots(date: string, duration: number, hours: WorkingHours, settings: BookingSettings, schedule: DayScheduleSlot[], now = new Date()) {
   const day = new Date(`${date}T00:00:00`);
-  const key = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'][day.getDay()];
+  const key = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'][day.getDay()] || 'dom';
   if (!hours.days.includes(key) || hours.blockedDates?.includes(date)) return [];
   const window = hours.overrides?.[key] || hours;
   const start = minutes(window.start), end = minutes(window.end);
