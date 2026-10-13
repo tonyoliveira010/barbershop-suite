@@ -1,11 +1,13 @@
 // @ts-nocheck -- ported as-is from the original AI Studio project
+import { localDate, availableSlots, durationMinutes } from '../../utils/availability';
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { X, Crown } from 'lucide-react';
 
 export const ManualBookingModal: React.FC = () => {
-  const { isManualBookingOpen, setIsManualBookingOpen, services, addClientBooking } = useApp();
+  const { isManualBookingOpen, setIsManualBookingOpen, services, addClientBooking, workingHours, bookingSettings, daySchedule, showToast } = useApp();
 
+  const [date, setDate] = useState(localDate());
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [time, setTime] = useState('10:00');
@@ -23,15 +25,18 @@ export const ManualBookingModal: React.FC = () => {
     e.preventDefault();
     if (!name.trim()) return;
 
-    addClientBooking({
+    if (!availableSlots(date, durationMinutes(activeServices.find(s => s.name === selectedService)?.duration), workingHours, bookingSettings, daySchedule).includes(time)) return showToast("Escolha um horário disponível.");
+    const booked = addClientBooking({
+      date,
       name: name.trim(),
-      phone: phone.trim() || '(11) 99000-0000',
+      phone: phone.trim(),
       time: time || '10:00',
       serviceName: selectedService,
       vip: isVip,
       notes: notes.trim() || undefined,
     });
 
+    if (booked === false) return;
     setName('');
     setPhone('');
     setNotes('');
@@ -59,6 +64,7 @@ export const ManualBookingModal: React.FC = () => {
           </button>
         </div>
 
+        <label className="mb-3 block text-xs">Data<input type="date" value={date} onChange={e => setDate(e.target.value)} className="mt-1 w-full rounded-xl border border-border bg-secondary p-3" /></label>
         <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
           <div>
             <label className="text-[10px] font-bold uppercase tracking-wider text-white/40 block mb-1">

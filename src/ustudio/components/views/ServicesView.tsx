@@ -15,6 +15,7 @@ import {
 export const ServicesView: React.FC = () => {
   const {
     services,
+    profile, saveProfile, showToast,
     categories,
     paymentConfig,
     setActiveTab,
@@ -23,10 +24,12 @@ export const ServicesView: React.FC = () => {
     setSelectedProduct,
   } = useApp();
 
+  const [catalogTab, setCatalogTab] = useState('servico');
   const [viewMode, setViewMode] = useState<'list' | 'cards'>('cards');
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
 
   const filteredServices = services.filter((s) => {
+    if (s.type !== catalogTab) return false;
     if (selectedFilter === 'all') return true;
     return s.cat === selectedFilter;
   });
@@ -61,7 +64,7 @@ export const ServicesView: React.FC = () => {
       <div className="flex items-center justify-between pt-3">
         <h2 className="text-2xl font-bold text-white tracking-tight">Serviços</h2>
         <button
-          onClick={() => setEditingService({ item: null, isNew: true })}
+          onClick={() => catalogTab === 'produto' && !profile.catalogDemo ? showToast('Ative a demonstração do catálogo primeiro.') : setEditingService({ item: null, isNew: true, defaultType: catalogTab })}
           className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white text-black font-semibold text-xs hover:bg-white/90 active:scale-95 transition-transform"
         >
           <Plus className="w-4 h-4 stroke-[2.2]" />
@@ -69,40 +72,8 @@ export const ServicesView: React.FC = () => {
         </button>
       </div>
 
-      {/* Quick Access Action Banners */}
-      <div className="space-y-2.5">
-        <button
-          onClick={() => setActiveTab('dashboard')}
-          className="w-full p-3.5 rounded-2xl bg-[#161616] border border-white/10 hover:bg-[#1e1e1e] hover:border-white/20 transition-all flex items-center gap-3.5 text-left group"
-        >
-          <div className="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-white flex-shrink-0">
-            <TrendingUp className="w-4 h-4 text-[#2f7dff]" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <b className="text-sm font-bold text-white block">Dashboard financeiro</b>
-            <span className="text-xs text-white/50 block truncate">
-              Faturamento, previsão e ticket médio
-            </span>
-          </div>
-          <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-white/70 transition-colors" />
-        </button>
-
-        <button
-          onClick={() => setIsPaymentConfigOpen(true)}
-          className="w-full p-3.5 rounded-2xl bg-[#161616] border border-white/10 hover:bg-[#1e1e1e] hover:border-white/20 transition-all flex items-center gap-3.5 text-left group"
-        >
-          <div className="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-white flex-shrink-0">
-            <CreditCard className="w-4 h-4 text-[#34c281]" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <b className="text-sm font-bold text-white block">Configurar pagamentos</b>
-            <span className="text-xs text-white/50 block truncate">
-              {getPaymentStatusText()}
-            </span>
-          </div>
-          <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-white/70 transition-colors" />
-        </button>
-      </div>
+      <div className="flex gap-2 border-b border-border pb-3">{[['servico', 'Serviços'], ['produto', 'Catálogo']].map(([value, label]) => <button key={value} onClick={() => { setCatalogTab(value); setSelectedFilter('all'); }} className={`rounded-full px-4 py-2 text-sm ${catalogTab === value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>{label}</button>)}</div>
+      {catalogTab === 'produto' && <div className="space-y-2 text-sm text-muted-foreground"><b className="text-foreground">R$ 12,90/mês · até 10 produtos</b><p>{services.filter(s => s.type === 'produto').length}/10 produtos · Reserva para pagar no ato</p>{!profile.catalogDemo && <button onClick={() => saveProfile({ catalogDemo: true })} className="rounded-full border border-border px-4 py-2 text-foreground">Experimentar demonstração local</button>}<span className="block text-xs">Demonstração sem cobrança; assinatura ainda não disponível.</span></div>}
 
       {/* View Mode Toggle */}
       <div className="flex items-center justify-between">
@@ -168,7 +139,7 @@ export const ServicesView: React.FC = () => {
           <div className="p-8 rounded-2xl bg-[#161616] border border-white/10 text-center">
             <p className="text-sm text-white/60">Nenhum item nesta categoria.</p>
             <button
-              onClick={() => setEditingService({ item: null, isNew: true })}
+              onClick={() => catalogTab === 'produto' && !profile.catalogDemo ? showToast('Ative a demonstração do catálogo primeiro.') : setEditingService({ item: null, isNew: true, defaultType: catalogTab })}
               className="mt-3 text-xs font-semibold text-[#2f7dff] hover:underline"
             >
               + Adicionar item agora
@@ -182,7 +153,7 @@ export const ServicesView: React.FC = () => {
               return (
                 <div key={catKey} className="space-y-2">
                   <div className="flex items-center gap-2 pt-2">
-                    <span className="text-sm">{cat.emoji}</span>
+                    <span className="text-sm"></span>
                     <h3 className="text-xs font-bold uppercase tracking-wider text-white/40">
                       {cat.label}
                     </h3>
@@ -231,7 +202,7 @@ export const ServicesView: React.FC = () => {
               <div key={catKey} className="space-y-3">
                 <div className="flex items-baseline justify-between pt-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-base">{cat.emoji}</span>
+                    <span className="text-base"></span>
                     <h3 className="text-lg font-bold text-white tracking-tight">{cat.label}</h3>
                   </div>
                   <span className="text-xs text-white/45">
@@ -267,7 +238,7 @@ export const ServicesView: React.FC = () => {
                         )}
                         {!s.image && (
                           <span className="group-hover:scale-110 transition-transform">
-                            {s.emoji || cat.emoji}
+                            <Sparkles className="h-8 w-8 text-muted-foreground" />
                           </span>
                         )}
                       </div>

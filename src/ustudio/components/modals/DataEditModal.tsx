@@ -1,4 +1,5 @@
 // @ts-nocheck -- ported as-is from the original AI Studio project
+import { safeLink } from '../../utils/contactLinks';
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { absorbPayload } from '../../utils/pix';
@@ -25,10 +26,10 @@ export const DataEditModal: React.FC<DataEditModalProps> = ({ type, onClose }) =
   const [pixName, setPixName] = useState(profile.pixName || 'Antonio Jose de Oliveira');
   const [pixCity, setPixCity] = useState(profile.pixCity || 'SAO PAULO');
 
-  const [whats, setWhats] = useState(profile.whats || '(11) 90000-0000');
-  const [insta, setInsta] = useState(profile.insta || '@marinaravi');
+  const [whats, setWhats] = useState(safeLink(profile.whats || ''));
+  const [insta, setInsta] = useState(safeLink(profile.insta || ''));
   const [email, setEmail] = useState(profile.email || 'contato@marinaravi.com.br');
-  const [address, setAddress] = useState(profile.address || 'Av. Paulista, 1000 · Bela Vista, São Paulo — SP');
+  const [address, setAddress] = useState(safeLink(profile.address || ''));
 
   useEffect(() => {
     setPlace(profile.place || 'Studio Marina Ravi');
@@ -38,10 +39,10 @@ export const DataEditModal: React.FC<DataEditModalProps> = ({ type, onClose }) =
     setPixKey(profile.pixKey || 'tonyfilho911@gmail.com');
     setPixName(profile.pixName || 'Antonio Jose de Oliveira');
     setPixCity(profile.pixCity || 'SAO PAULO');
-    setWhats(profile.whats || '(11) 90000-0000');
-    setInsta(profile.insta || '@marinaravi');
+    setWhats(safeLink(profile.whats || ''));
+    setInsta(safeLink(profile.insta || ''));
     setEmail(profile.email || 'contato@marinaravi.com.br');
-    setAddress(profile.address || 'Av. Paulista, 1000 · Bela Vista, São Paulo — SP');
+    setAddress(safeLink(profile.address || ''));
   }, [profile, type]);
 
   if (!type) return null;
@@ -58,6 +59,8 @@ export const DataEditModal: React.FC<DataEditModalProps> = ({ type, onClose }) =
   };
 
   const handleSave = () => {
+    if (type === 'infinitepay') return;
+    if (type === 'contact' && [whats, insta, address].some(value => value.trim() && !safeLink(value.trim()))) return showToast('Cole links completos começando com https://.');
     if (type === 'google') {
       saveProfile({
         place: place.trim(),
@@ -91,7 +94,7 @@ export const DataEditModal: React.FC<DataEditModalProps> = ({ type, onClose }) =
 
   const titles = {
     google: 'Avaliações no Google',
-    infinitepay: 'Agendamento online (InfinitePay)',
+    infinitepay: 'InfinitePay · Em breve',
     pix: 'Pagamento Pix',
     contact: 'Informações de Contato',
   };
@@ -126,6 +129,7 @@ export const DataEditModal: React.FC<DataEditModalProps> = ({ type, onClose }) =
           </button>
         </div>
 
+        {type === "infinitepay" && <p className="py-8 text-center text-sm text-muted-foreground">Em breve · Integração de pagamentos com InfinitePay.</p>}
         {/* MODAL 1: AVALIAÇÕES NO GOOGLE */}
         {type === 'google' && (
           <div className="space-y-4 text-xs">
@@ -175,7 +179,7 @@ export const DataEditModal: React.FC<DataEditModalProps> = ({ type, onClose }) =
         )}
 
         {/* MODAL 2: AGENDAMENTO ONLINE (INFINITEPAY) */}
-        {type === 'infinitepay' && (
+        {false && type === 'infinitepay' && (
           <div className="space-y-4 text-xs">
             <div>
               <label className="text-[10px] font-bold text-white/50 block mb-1">
@@ -266,7 +270,7 @@ export const DataEditModal: React.FC<DataEditModalProps> = ({ type, onClose }) =
                   type="text"
                   value={whats}
                   onChange={(e) => setWhats(e.target.value)}
-                  placeholder="(11) 90000-0000"
+                  placeholder="https://wa.me/5511999999999"
                   className="w-full px-3 py-2.5 rounded-xl bg-[#1e1e1e] border border-white/10 text-white font-medium focus:outline-none focus:border-white/30"
                 />
               </div>
@@ -279,7 +283,7 @@ export const DataEditModal: React.FC<DataEditModalProps> = ({ type, onClose }) =
                   type="text"
                   value={insta}
                   onChange={(e) => setInsta(e.target.value)}
-                  placeholder="@marinaravi"
+                  placeholder="https://www.instagram.com/suabarbearia/"
                   className="w-full px-3 py-2.5 rounded-xl bg-[#1e1e1e] border border-white/10 text-white font-medium focus:outline-none focus:border-white/30"
                 />
               </div>
@@ -317,7 +321,7 @@ export const DataEditModal: React.FC<DataEditModalProps> = ({ type, onClose }) =
         <div className="pt-4 mt-4 border-t border-white/10">
           <button
             type="button"
-            onClick={handleSave}
+            disabled={type === "infinitepay"} onClick={handleSave}
             className="w-full py-3.5 rounded-full bg-white text-black font-bold text-xs hover:bg-white/90 active:scale-98 transition-transform shadow-lg flex items-center justify-center gap-1.5"
           >
             <Check className="w-4 h-4 stroke-[2.5]" />

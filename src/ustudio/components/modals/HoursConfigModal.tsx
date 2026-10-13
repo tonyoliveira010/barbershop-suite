@@ -14,11 +14,15 @@ const WEEKDAYS = [
 ];
 
 export const HoursConfigModal: React.FC = () => {
-  const { isHoursConfigOpen, setIsHoursConfigOpen, workingHours, saveWorkingHours } = useApp();
+  const { isHoursConfigOpen, setIsHoursConfigOpen, workingHours, saveWorkingHours, showToast } = useApp();
 
   const [selectedDays, setSelectedDays] = useState<string[]>(workingHours.days);
   const [startTime, setStartTime] = useState(workingHours.start);
   const [endTime, setEndTime] = useState(workingHours.end);
+
+  const [overrides, setOverrides] = useState(workingHours.overrides || {});
+  const [blockedDates, setBlockedDates] = useState(workingHours.blockedDates || []);
+  const [blockedDate, setBlockedDate] = useState('');
 
   if (!isHoursConfigOpen) return null;
 
@@ -29,7 +33,9 @@ export const HoursConfigModal: React.FC = () => {
   };
 
   const handleSave = () => {
+    if (startTime >= endTime || Object.values(overrides).some(w => w.start >= w.end)) return showToast("O fechamento deve ser após a abertura.");
     saveWorkingHours({
+      overrides, blockedDates,
       days: selectedDays,
       start: startTime,
       end: endTime,
@@ -42,7 +48,7 @@ export const HoursConfigModal: React.FC = () => {
       onClick={() => setIsHoursConfigOpen(false)}
     >
       <div
-        className="w-full max-w-[430px] bg-[#161616] border border-white/15 rounded-t-3xl sm:rounded-3xl p-5 animate-in fade-in slide-in-from-bottom-4 duration-200"
+        className="w-full max-w-[430px] max-h-[90vh] overflow-y-auto bg-[#161616] border border-white/15 rounded-t-3xl sm:rounded-3xl p-5 animate-in fade-in slide-in-from-bottom-4 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
@@ -112,6 +118,8 @@ export const HoursConfigModal: React.FC = () => {
           </div>
         </div>
 
+        <section className="mt-4 space-y-3 text-xs"><h4 className="font-semibold text-foreground">Horários especiais por dia</h4>{WEEKDAYS.filter(day => selectedDays.includes(day.key)).map(day => <div key={day.key} className="space-y-2"><label className="flex items-center gap-2"><input type="checkbox" checked={!!overrides[day.key]} onChange={e => setOverrides(prev => { const next = {...prev}; if (e.target.checked) next[day.key] = {start: startTime, end: endTime}; else delete next[day.key]; return next; })} />{day.label} · horário especial</label>{overrides[day.key] && <div className="grid grid-cols-2 gap-2">{['start', 'end'].map(field => <input key={field} aria-label={`${day.label} ${field === 'start' ? 'abertura' : 'fechamento'}`} type="time" value={overrides[day.key][field]} onChange={e => setOverrides(prev => ({...prev, [day.key]: {...prev[day.key], [field]: e.target.value}}))} className="rounded-xl border border-border bg-secondary p-2 text-foreground" />)}</div>}</div>)}</section>
+        <section className="mt-5 space-y-2 text-xs"><h4 className="font-semibold text-foreground">Datas indisponíveis</h4><div className="flex gap-2"><input aria-label="Data indisponível" type="date" value={blockedDate} onChange={e => setBlockedDate(e.target.value)} className="min-w-0 flex-1 rounded-xl border border-border bg-secondary p-2 text-foreground" /><button onClick={() => { if (blockedDate && !blockedDates.includes(blockedDate)) setBlockedDates([...blockedDates, blockedDate]); }} className="rounded-xl border border-border px-3 text-foreground">Bloquear dia</button></div>{blockedDates.map(date => <div key={date} className="flex justify-between py-2 text-muted-foreground">{date}<button onClick={() => setBlockedDates(blockedDates.filter(d => d !== date))} className="text-foreground">Liberar</button></div>)}</section>
         <div className="flex gap-2 pt-5 border-t border-white/10 mt-5">
           <button
             type="button"

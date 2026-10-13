@@ -115,7 +115,7 @@ export const PageFormatView: React.FC<{ onBack?: () => void }> = ({ onBack }) =>
     }
     if (f.type.startsWith('video/')) {
       setCoverType('video');
-      setCover(URL.createObjectURL(f));
+      const reader = new FileReader(); reader.onload = () => setCover(String(reader.result)); reader.readAsDataURL(f);
     } else {
       setCoverType('image');
       const reader = new FileReader();
@@ -288,25 +288,7 @@ export const PageFormatView: React.FC<{ onBack?: () => void }> = ({ onBack }) =>
             </label>
           </div>
 
-          {/* Agendamento online (InfinitePay) */}
-          <div className="pt-2 border-t border-white/10">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-white/70 mb-1">
-              Agendamento online (InfinitePay)
-            </h3>
-            <label className="text-[10px] font-bold text-white/40 block mb-1">
-              URL da API de agendamento
-            </label>
-            <input
-              type="text"
-              value={apiUrl}
-              onChange={(e) => setApiUrl(e.target.value)}
-              placeholder="https://api.seudominio.com"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[#1e1e1e] border border-white/10 text-white font-mono text-[11px] focus:outline-none focus:border-white/30"
-            />
-            <p className="text-[11px] text-white/40 mt-1 leading-relaxed">
-              Servidor backend que guarda sua InfiniteTag, cria o link de checkout e valida os pagamentos.
-            </p>
-          </div>
+<div className="border-t border-border pt-3 text-sm text-muted-foreground">InfinitePay e Pix por API · Em breve</div>
 
           {/* Pagamento Pix */}
           <div className="pt-2 border-t border-white/10">

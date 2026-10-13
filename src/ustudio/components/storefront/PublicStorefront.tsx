@@ -1,4 +1,6 @@
 // @ts-nocheck -- ported as-is from the original AI Studio project
+import { availableSlots, durationMinutes, localDate } from '../../utils/availability';
+import { safeLink, mapEmbed } from '../../utils/contactLinks';
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { ServiceItem } from '../../types';
@@ -22,7 +24,7 @@ const DOWS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 export const PublicStorefront: React.FC = () => {
   const {
     profile,
-    services,
+    services, workingHours, bookingSettings, daySchedule,
     setIsStorefrontOpen,
     addClientBooking,
     showToast,
@@ -34,10 +36,10 @@ export const PublicStorefront: React.FC = () => {
   const place = profile.place || title;
   const google = profile.google || 'https://share.google/OIdcey9tf11sD3lEz';
   const googleOn = profile.googleOn ?? true;
-  const whats = profile.whats || '(11) 90000-0000';
-  const insta = profile.insta || profile.handle || '@marinaravi';
+  const whats = safeLink(profile.whats || '');
+  const insta = safeLink(profile.insta || '');
   const email = profile.email || 'contato@marinaravi.com.br';
-  const address = profile.address || 'Av. Paulista, 1000 · Bela Vista, São Paulo — SP';
+  const address = safeLink(profile.address || '');
   const pixKey = profile.pixKey || 'tonyfilho911@gmail.com';
   const pixName = profile.pixName || 'Antonio Jose de Oliveira';
   const pixCity = profile.pixCity || 'SAO PAULO';
@@ -50,7 +52,7 @@ export const PublicStorefront: React.FC = () => {
   const promoVideos = profile.promoVideos || [];
 
   // Tabs state (servicos, sobre mim com localização e contato unificados, pagamento)
-  const [activeTab, setActiveTab] = useState<'servicos' | 'sobre' | 'pagamento'>('servicos');
+  const [activeTab, setActiveTab] = useState<'servicos' | 'catalogo' | 'sobre' | 'pagamento'>('servicos');
 
   // Pix dynamic payment state
   const [payAmount, setPayAmount] = useState('50,00');
@@ -65,68 +67,17 @@ export const PublicStorefront: React.FC = () => {
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
   const [bookStep, setBookStep] = useState<1 | 2 | 3 | 4>(1);
   const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
-  const [selectedDate, setSelectedDate] = useState('2026-09-11');
-  const [selectedTime, setSelectedTime] = useState('10:00');
+  const [selectedDate, setSelectedDate] = useState(localDate());
+  const [selectedTime, setSelectedTime] = useState('');
   const [clientForm, setClientForm] = useState({ nome: '', telefone: '', email: '' });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isBookingSuccess, setIsBookingSuccess] = useState(false);
 
-  // Pre-configured agenda days for booking
-  const agendaDays = [
-    {
-      data: '2026-09-11',
-      dow: 'Sex',
-      day: '11',
-      horarios: [
-        { hora: '09:00', livre: true },
-        { hora: '10:00', livre: true },
-        { hora: '11:30', livre: false },
-        { hora: '14:00', livre: true },
-        { hora: '15:30', livre: true },
-        { hora: '17:00', livre: true },
-      ],
-    },
-    {
-      data: '2026-09-12',
-      dow: 'Sáb',
-      day: '12',
-      horarios: [
-        { hora: '09:00', livre: true },
-        { hora: '10:30', livre: true },
-        { hora: '13:00', livre: true },
-      ],
-    },
-    {
-      data: '2026-09-14',
-      dow: 'Seg',
-      day: '14',
-      horarios: [
-        { hora: '10:00', livre: true },
-        { hora: '13:00', livre: true },
-        { hora: '15:00', livre: true },
-      ],
-    },
-    {
-      data: '2026-09-15',
-      dow: 'Ter',
-      day: '15',
-      horarios: [
-        { hora: '09:00', livre: true },
-        { hora: '11:00', livre: true },
-        { hora: '14:00', livre: true },
-      ],
-    },
-    {
-      data: '2026-09-16',
-      dow: 'Qua',
-      day: '16',
-      horarios: [
-        { hora: '09:30', livre: true },
-        { hora: '14:30', livre: true },
-        { hora: '16:00', livre: true },
-      ],
-    },
-  ];
+  const agendaDays = Array.from({ length: 30 }, (_, index) => {
+    const date = new Date(); date.setDate(date.getDate() + index);
+    const data = localDate(date);
+    return { data, dow: DOWS[date.getDay()], day: String(date.getDate()), horarios: availableSlots(data, durationMinutes(selectedService?.duration), workingHours, bookingSettings, daySchedule).map(hora => ({ hora, livre: true })) };
+  });
 
   // Recalculate Pix BR Code and QR SVG
   useEffect(() => {
@@ -196,7 +147,11 @@ export const PublicStorefront: React.FC = () => {
   };
 
   // Booking Flow Triggers
+  const [reservedProduct, setReservedProduct] = useState<ServiceItem | null>(null);
+  const [reservationName, setReservationName] = useState('');
+  const [reservationPhone, setReservationPhone] = useState('');
   const openBookingFor = (svc?: ServiceItem) => {
+    if (svc?.type === 'produto') { setReservedProduct(svc); return; }
     if (svc) {
       setSelectedService(svc);
       setBookStep(2);
@@ -221,14 +176,15 @@ export const PublicStorefront: React.FC = () => {
       if (!clientForm.nome.trim() || clientForm.nome.trim().split(' ').length < 2) {
         errors.nome = 'Informe seu nome e sobrenome.';
       }
-      if (clientForm.telefone.replace(/\D/g, '').length < 10) {
+      if ((bookingSettings.requireWhatsapp || clientForm.telefone) && clientForm.telefone.replace(/\D/g, '').length < 10) {
         errors.telefone = 'Informe um WhatsApp com DDD válido.';
       }
       setFormErrors(errors);
       if (Object.keys(errors).length > 0) return;
 
       // Register booking
-      addClientBooking({
+      const booked = addClientBooking({
+        date: selectedDate,
         name: clientForm.nome.trim(),
         phone: clientForm.telefone.trim(),
         time: selectedTime,
@@ -236,15 +192,16 @@ export const PublicStorefront: React.FC = () => {
         vip: false,
       });
 
+      if (booked === false) return;
       setIsBookingSuccess(true);
       setBookStep(4);
       showToast('Agendamento confirmado com sucesso!');
     }
   };
 
-  const digitsWhats = whats.replace(/\D/g, '');
-  const instaHandle = insta.replace(/^@/, '').trim();
-  const whatsappUrl = digitsWhats ? `https://wa.me/${digitsWhats.length <= 11 ? '55' + digitsWhats : digitsWhats}` : '#';
+  const whatsappUrl = safeLink(whats);
+  const instaHandle = insta;
+  const locationEmbed = mapEmbed(address);
 
   const selectedDayObj = agendaDays.find((d) => d.data === selectedDate) || agendaDays[0];
 
@@ -267,6 +224,7 @@ export const PublicStorefront: React.FC = () => {
         </button>
       </div>
 
+      {reservedProduct && <div className="fixed inset-0 z-[60] flex items-center justify-center bg-background/90 p-4"><div className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-secondary p-5"><h3 className="font-semibold">Reservar {reservedProduct.name}</h3><p className="text-sm text-muted-foreground">{reservedProduct.price} · retirada e pagamento no ato</p><input aria-label="Nome para reserva" placeholder="Nome completo" value={reservationName} onChange={e => setReservationName(e.target.value)} className="w-full rounded-xl border border-border bg-background p-3" /><input aria-label="WhatsApp para reserva" placeholder="WhatsApp com DDD" value={reservationPhone} onChange={e => setReservationPhone(e.target.value)} className="w-full rounded-xl border border-border bg-background p-3" /><button className="w-full rounded-full bg-primary p-3 text-primary-foreground" onClick={() => { if (!reservationName.trim() || reservationPhone.replace(/\D/g, '').length < 10) return showToast('Informe nome e WhatsApp válido.'); const reservations = JSON.parse(localStorage.getItem('studiolite_product_reservations') || '[]'); localStorage.setItem('studiolite_product_reservations', JSON.stringify([...reservations, { id: Date.now(), product: reservedProduct.name, name: reservationName, phone: reservationPhone, status: 'Reservado', createdAt: new Date().toISOString() }])); showToast('Reserva salva neste aparelho para pagamento no ato.'); setReservedProduct(null); }}>Confirmar reserva local</button><button onClick={() => setReservedProduct(null)} className="w-full text-sm text-muted-foreground">Cancelar</button></div></div>}
       {/* Main Container */}
       <div className="w-full max-w-[430px] min-h-screen bg-black pb-24 relative shadow-2xl">
         {/* CINE HERO */}
@@ -476,6 +434,7 @@ export const PublicStorefront: React.FC = () => {
         <div className="flex border-b border-white/10 px-4 mt-5">
           {[
             { id: 'servicos', label: 'Serviços' },
+            ...(profile.catalogDemo ? [{ id: 'catalogo', label: 'Catálogo' }] : []),
             { id: 'sobre', label: 'Sobre mim' },
             { id: 'pagamento', label: 'Pagamento' },
           ].map((tab) => (
@@ -495,15 +454,15 @@ export const PublicStorefront: React.FC = () => {
         </div>
 
         {/* TAB 1: SERVIÇOS */}
-        {activeTab === 'servicos' && (
+        {(activeTab === 'servicos' || activeTab === 'catalogo') && (
           <div className="space-y-5 p-4">
             {(categories.length ? categories : [{ key: '__all', label: 'Serviços', emoji: '✂️' }]).map((cat) => {
-              const items = cat.key === '__all' ? services : services.filter((s) => s.cat === cat.key);
+              const items = services.filter(s => s.type === (activeTab === 'catalogo' ? 'produto' : 'servico') && (cat.key === '__all' || s.cat === cat.key));
               if (!items.length) return null;
               return (
                 <div key={cat.key} className="space-y-3">
                   <div className="flex items-baseline justify-between">
-                    <div className="flex min-w-0 items-center gap-2"><span className="text-base">{cat.emoji}</span><h3 className="truncate text-lg font-bold tracking-tight text-white">{cat.label}</h3></div>
+                    <div className="flex min-w-0 items-center gap-2"><h3 className="truncate text-lg font-bold tracking-tight text-white">{cat.label}</h3></div>
                     <span className="shrink-0 text-xs text-white/45">{items.length} {items.length === 1 ? 'item' : 'itens'}</span>
                   </div>
                   {serviceDisplay === 'cards' ? (
@@ -512,7 +471,7 @@ export const PublicStorefront: React.FC = () => {
                         <button key={s.id} type="button" onClick={() => openBookingFor(s)} className="group flex w-[240px] flex-shrink-0 flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#161616] text-left shadow-lg transition-all hover:border-white/30">
                           <div className="relative flex h-36 w-full items-center justify-center overflow-hidden text-5xl" style={{ background: s.image ? `url('${s.image}') center/cover no-repeat` : `linear-gradient(180deg, ${cat.soft || '#262626'} 0%, rgba(22,22,22,0.85) 100%)` }}>
                             {s.badge && <span className="absolute left-3 top-3 z-10 rounded-full bg-gradient-to-r from-[#ff5f8a] to-[#ef1f4d] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-white shadow-md">{s.badge}</span>}
-                            {!s.image && <span>{s.emoji || cat.emoji}</span>}
+                            {!s.image && <span><span className="text-sm text-muted-foreground">Sem foto</span></span>}
                           </div>
                           <div className="flex flex-1 flex-col justify-between p-4">
                             <div>
@@ -522,7 +481,7 @@ export const PublicStorefront: React.FC = () => {
                             </div>
                             <div className="flex items-center justify-between border-t border-white/10 pt-2">
                               <div><span className="block text-base font-extrabold text-white">{s.price}</span><span className="text-[10px] text-white/45">{s.duration}</span></div>
-                              <span className="rounded-full bg-gradient-to-r from-[#ff5f8a] to-[#ef1f4d] px-3.5 py-1.5 text-xs font-bold text-white shadow-md">Agendar</span>
+                              <span className="rounded-full bg-gradient-to-r from-[#ff5f8a] to-[#ef1f4d] px-3.5 py-1.5 text-xs font-bold text-white shadow-md">{s.type === 'produto' ? 'Reservar' : 'Agendar'}</span>
                             </div>
                           </div>
                         </button>
@@ -543,6 +502,7 @@ export const PublicStorefront: React.FC = () => {
                       ))}
                     </div>
                   )}
+                  {banners.filter(banner => banner.position === 'after:' + cat.key).map(renderBanner)}
                 </div>
               );
             })}
@@ -596,24 +556,25 @@ export const PublicStorefront: React.FC = () => {
               </div>
 
               {/* Google Maps Embed Frame */}
-              <div className="h-60 rounded-2xl overflow-hidden bg-[#1e1e1e] border border-white/10 relative">
-                <iframe
+              <div className="rounded-2xl overflow-hidden bg-[#1e1e1e] border border-white/10 relative">
+                {!locationEmbed && <p className="p-4 text-xs text-muted-foreground">Abra o link para ver a localização exata. Para exibir o mapa aqui, use um link Google Maps com coordenadas ou de incorporação.</p>}
+                {locationEmbed && <iframe
                   title="Estabelecimento no Google Maps"
-                  src={`https://www.google.com/maps?q=${encodeURIComponent(place || title)}&output=embed&hl=pt-BR`}
-                  className="w-full h-full border-0"
+                  src={locationEmbed || undefined}
+                  className="w-full h-60 border-0"
                   loading="lazy"
-                />
+                />}
               </div>
 
               {address && (
                 <div className="text-xs text-white/70 leading-relaxed bg-[#1e1e1e] p-3 rounded-xl border border-white/5">
                   <b className="text-white block mb-0.5">Endereço do estúdio</b>
-                  <span>{address}</span>
+                  <span>Localização informada pelo estabelecimento</span>
                 </div>
               )}
 
               <a
-                href={google || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place || title)}`}
+                href={safeLink(address)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-2.5 rounded-full bg-[#1e1e1e] hover:bg-[#262626] border border-white/10 text-white font-semibold text-xs flex items-center justify-center gap-2 transition-colors"
@@ -643,7 +604,7 @@ export const PublicStorefront: React.FC = () => {
                       </div>
                       <div>
                         <b className="block font-bold text-xs">WhatsApp</b>
-                        <span className="text-[11px] text-white/50">{whats}</span>
+                        <span className="text-[11px] text-white/50">Abrir WhatsApp</span>
                       </div>
                     </div>
                     <span className="text-white/40 text-xs">Falar agora ›</span>
@@ -652,7 +613,7 @@ export const PublicStorefront: React.FC = () => {
 
                 {instaHandle && (
                   <a
-                    href={`https://instagram.com/${instaHandle}`}
+                    href={safeLink(insta)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-3.5 rounded-2xl bg-[#1e1e1e] border border-white/10 flex items-center justify-between text-white hover:bg-[#262626] transition-colors"
@@ -663,7 +624,7 @@ export const PublicStorefront: React.FC = () => {
                       </div>
                       <div>
                         <b className="block font-bold text-xs">Instagram</b>
-                        <span className="text-[11px] text-white/50">@{instaHandle}</span>
+                        <span className="text-[11px] text-white/50">Abrir Instagram</span>
                       </div>
                     </div>
                     <span className="text-white/40 text-xs">Ver perfil ›</span>
@@ -840,7 +801,7 @@ export const PublicStorefront: React.FC = () => {
 
             <div className="space-y-2">
               <a
-                href={google || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place || title)}`}
+                href={safeLink(address)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-3.5 rounded-full bg-white text-black font-bold text-xs flex items-center justify-center gap-2 hover:bg-white/90"
@@ -946,7 +907,7 @@ export const PublicStorefront: React.FC = () => {
                       <button
                         key={d.data}
                         type="button"
-                        onClick={() => setSelectedDate(d.data)}
+                        onClick={() => { setSelectedDate(d.data); setSelectedTime(''); }}
                         className={`flex-shrink-0 w-14 py-2.5 rounded-2xl flex flex-col items-center justify-center transition-all ${
                           selectedDate === d.data
                             ? 'bg-white text-black font-extrabold shadow-md'
@@ -965,6 +926,7 @@ export const PublicStorefront: React.FC = () => {
                     Escolha o horário
                   </span>
                   <div className="grid grid-cols-3 gap-2">
+                    {selectedDayObj.horarios.length === 0 && <p className="col-span-3 py-4 text-center text-muted-foreground">Sem horários disponíveis neste dia.</p>}
                     {selectedDayObj.horarios.map((h) => (
                       <button
                         key={h.hora}
@@ -1016,7 +978,7 @@ export const PublicStorefront: React.FC = () => {
                   <div className="flex justify-between">
                     <span className="text-white/50">Data</span>
                     <b className="text-white font-bold">
-                      {selectedDayObj.dow}, {selectedDayObj.day} de setembro
+                      {new Date(selectedDate + "T12:00:00").toLocaleDateString("pt-BR")}
                     </b>
                   </div>
                   <div className="flex justify-between">
@@ -1085,7 +1047,7 @@ export const PublicStorefront: React.FC = () => {
                     onClick={handleBookNext}
                     className="flex-1 py-3 rounded-full bg-white hover:bg-white/90 text-black text-xs font-bold transition-colors"
                   >
-                    Pagar com InfinitePay ou Pix
+                    Confirmar agendamento · pagar no ato
                   </button>
                 </div>
                 <p className="text-[11px] text-white/40 text-center leading-relaxed">
@@ -1104,7 +1066,7 @@ export const PublicStorefront: React.FC = () => {
                 <p className="text-xs text-white/70 leading-relaxed max-w-xs mx-auto">
                   Seu agendamento para <b>{selectedService?.name}</b> foi confirmado para{' '}
                   <b>
-                    {selectedDayObj.dow}, {selectedDayObj.day} de setembro às {selectedTime}
+                    {new Date(selectedDate + "T12:00:00").toLocaleDateString("pt-BR")} às {selectedTime}
                   </b>
                   .
                 </p>

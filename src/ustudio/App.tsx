@@ -26,11 +26,11 @@ const AppContent: React.FC = () => {
   const { activeTab, setActiveTab, isStorefrontOpen, toastMessage } = useApp();
 
   if (isStorefrontOpen) {
-    return <PublicStorefront />;
+    return <div className="studio-theme"><PublicStorefront /></div>;
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-[#fafafa] flex justify-center selection:bg-[#ef1f4d] selection:text-white">
+    <div className="studio-theme min-h-screen bg-[#050505] text-[#fafafa] flex justify-center selection:bg-[#ef1f4d] selection:text-white">
       {/* Mobile Shell */}
       <div className="w-full max-w-[430px] min-h-screen bg-[#000000] border-x border-white/5 relative flex flex-col justify-between pb-4 shadow-2xl">
         <div>
