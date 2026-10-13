@@ -556,13 +556,14 @@ export const PublicStorefront: React.FC = () => {
               </div>
 
               {/* Google Maps Embed Frame */}
-              <div className="h-60 rounded-2xl overflow-hidden bg-[#1e1e1e] border border-white/10 relative">
-                <iframe
+              <div className="rounded-2xl overflow-hidden bg-[#1e1e1e] border border-white/10 relative">
+                {!locationEmbed && <p className="p-4 text-xs text-muted-foreground">Abra o link para ver a localização exata. Para exibir o mapa aqui, use um link Google Maps com coordenadas ou de incorporação.</p>}
+                {locationEmbed && <iframe
                   title="Estabelecimento no Google Maps"
                   src={locationEmbed || undefined}
-                  className="w-full h-full border-0"
+                  className="w-full h-60 border-0"
                   loading="lazy"
-                />
+                />}
               </div>
 
               {address && (
@@ -603,7 +604,7 @@ export const PublicStorefront: React.FC = () => {
                       </div>
                       <div>
                         <b className="block font-bold text-xs">WhatsApp</b>
-                        <span className="text-[11px] text-white/50">{whats}</span>
+                        <span className="text-[11px] text-white/50">Abrir WhatsApp</span>
                       </div>
                     </div>
                     <span className="text-white/40 text-xs">Falar agora ›</span>
@@ -623,7 +624,7 @@ export const PublicStorefront: React.FC = () => {
                       </div>
                       <div>
                         <b className="block font-bold text-xs">Instagram</b>
-                        <span className="text-[11px] text-white/50">@{instaHandle}</span>
+                        <span className="text-[11px] text-white/50">Abrir Instagram</span>
                       </div>
                     </div>
                     <span className="text-white/40 text-xs">Ver perfil ›</span>

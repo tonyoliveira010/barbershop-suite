@@ -15,7 +15,7 @@ export const AgendaView: React.FC = () => {
   const {
     daySchedule,
     clients,
-    workingHours,
+    workingHours, saveWorkingHours,
     setSelectedClientId,
     setIsHoursConfigOpen,
     setIsManualBookingOpen,
@@ -23,6 +23,7 @@ export const AgendaView: React.FC = () => {
     unblockSlot,
   } = useApp();
 
+  const [blockedDate, setBlockedDate] = useState('');
   const [agendaMode, setAgendaMode] = useState<'dia' | 'semana' | 'mes'>('dia');
   const [selectedDayNumber, setSelectedDayNumber] = useState<number>(11);
 
@@ -117,6 +118,7 @@ export const AgendaView: React.FC = () => {
 
   return (
     <div className="px-5 space-y-4">
+      <section className="space-y-2 border-b border-border pb-4"><h3 className="text-sm font-semibold">Bloquear uma data</h3><div className="flex gap-2"><input aria-label="Data para bloquear" type="date" value={blockedDate} onChange={e => setBlockedDate(e.target.value)} className="min-w-0 flex-1 rounded-xl border border-border bg-secondary p-2 text-foreground" /><button onClick={() => { if (blockedDate) saveWorkingHours({...workingHours, blockedDates: Array.from(new Set([...(workingHours.blockedDates || []), blockedDate]))}); }} className="rounded-xl border border-border px-3 text-sm">Bloquear dia</button></div>{(workingHours.blockedDates || []).map(date => <div key={date} className="flex items-center justify-between text-xs text-muted-foreground">{date}<button onClick={() => saveWorkingHours({...workingHours, blockedDates: workingHours.blockedDates.filter(d => d !== date)})}>Liberar</button></div>)}</section>
       {/* Header */}
       <div className="space-y-3 pt-3">
         <div className="flex items-center justify-between">
