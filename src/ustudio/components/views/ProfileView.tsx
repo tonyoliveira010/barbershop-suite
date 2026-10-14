@@ -222,7 +222,8 @@ export const ProfileView: React.FC = () => {
 
         {/* Cinema Titles overlaid directly on the image */}
         {isCinema && (
-          <div className="absolute left-0 right-0 bottom-0 z-20 p-5 pointer-events-none">
+          <div onClick={() => setProfileEditField('name')} title="Editar título e subtítulo" className="absolute left-0 right-0 bottom-0 z-20 p-5 cursor-pointer">
+            <span className="mb-2 inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2 py-1 text-[10px]"><Pencil className="h-3 w-3" /> Editar textos</span>
             <h1 className="text-3xl font-extrabold text-white leading-tight tracking-tight mb-2">
               {renderCinemaTitle()}
             </h1>

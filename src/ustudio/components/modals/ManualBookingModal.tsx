@@ -20,6 +20,7 @@ export const ManualBookingModal: React.FC = () => {
   const activeServices = services.filter((s) => s.type === 'servico');
   const defaultService = activeServices[0]?.name || 'Limpeza de pele profunda';
   const selectedService = serviceName || defaultService;
+  const slots = availableSlots(date, durationMinutes(activeServices.find(s => s.name === selectedService)?.duration), workingHours, bookingSettings, daySchedule);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,12 +99,12 @@ export const ManualBookingModal: React.FC = () => {
               <label className="text-[10px] font-bold uppercase tracking-wider text-white/40 block mb-1">
                 Horário
               </label>
-              <input
-                type="time"
+              <select
+                aria-label="Horário disponível"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl bg-[#1e1e1e] border border-white/10 text-white focus:outline-none focus:border-white/40 font-bold"
-              />
+              ><option value="">Escolha um horário</option>{slots.map(slot => <option key={slot} value={slot}>{slot}</option>)}</select>
             </div>
           </div>
 

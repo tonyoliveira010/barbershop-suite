@@ -107,7 +107,7 @@ export const HomeView: React.FC = () => {
             Um link só, com todos os seus serviços.
           </h2>
           <p className="text-sm font-normal text-white/90 leading-relaxed mb-5 max-w-[32ch]">
-            Monte seu catálogo, compartilhe o link e receba agendamentos e pagamentos direto no seu painel.
+            Monte seu catálogo, compartilhe o link e organize agendamentos e reservas para pagar no ato.
           </p>
           <button
             onClick={() => setIsStorefrontOpen(true)}

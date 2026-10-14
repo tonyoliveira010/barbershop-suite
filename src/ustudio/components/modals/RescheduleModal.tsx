@@ -1,4 +1,5 @@
 // @ts-nocheck -- ported as-is from the original AI Studio project
+import { localDate, availableSlots, durationMinutes } from '../../utils/availability';
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { X, Calendar } from 'lucide-react';
@@ -8,36 +9,13 @@ export const RescheduleModal: React.FC = () => {
     reschedulingClientId,
     setReschedulingClientId,
     clients,
-    daySchedule,
+    daySchedule, workingHours, bookingSettings,
     rescheduleAppointment,
   } = useApp();
 
-  const reschedDays = [
-    { key: 'sex11', label: 'Sex', num: '11', full: 'Sexta-feira 11', isToday: true },
-    { key: 'sab12', label: 'Sáb', num: '12', full: 'Sábado 12' },
-    { key: 'dom13', label: 'Dom', num: '13', full: 'Domingo 13' },
-    { key: 'seg14', label: 'Seg', num: '14', full: 'Segunda 14' },
-    { key: 'ter15', label: 'Ter', num: '15', full: 'Terça 15' },
-    { key: 'qua16', label: 'Qua', num: '16', full: 'Quarta 16' },
-    { key: 'qui17', label: 'Qui', num: '17', full: 'Quinta 17' },
-  ];
+  const reschedDays = Array.from({length:30}, (_, i) => { const date = new Date(); date.setDate(date.getDate()+i); const key = localDate(date); return { key, full:key, label:date.toLocaleDateString('pt-BR',{weekday:'short'}), num:String(date.getDate()) }; });
 
-  const reschedHours = [
-    '08:00',
-    '09:00',
-    '10:00',
-    '11:00',
-    '12:00',
-    '13:00',
-    '14:00',
-    '15:00',
-    '16:00',
-    '17:00',
-    '18:00',
-    '19:00',
-  ];
-
-  const [selectedDayKey, setSelectedDayKey] = useState<string>('sex11');
+  const [selectedDayKey, setSelectedDayKey] = useState<string>(localDate());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
   if (!reschedulingClientId) return null;
@@ -47,6 +25,7 @@ export const RescheduleModal: React.FC = () => {
 
   const currentDayObj = reschedDays.find((d) => d.key === selectedDayKey) || reschedDays[0];
 
+  const reschedHours = availableSlots(currentDayObj.key, durationMinutes(client.duration), workingHours, bookingSettings, daySchedule.filter(s => s.id !== client.id));
   const handleConfirm = () => {
     if (!selectedTime) return;
     rescheduleAppointment(client.id, currentDayObj.full, selectedTime);
@@ -108,10 +87,9 @@ export const RescheduleModal: React.FC = () => {
             2. Escolha o novo horário
           </label>
           <div className="grid grid-cols-3 gap-2">
+            {reschedHours.length === 0 && <p className="col-span-3 py-4 text-center text-xs text-muted-foreground">Sem horários disponíveis neste dia</p>}
             {reschedHours.map((t) => {
-              const isTaken = currentDayObj.isToday
-                ? daySchedule.some((s) => s.time === t && s.type === 'client' && s.id !== client.id)
-                : false;
+              const isTaken = false;
               const isSelected = selectedTime === t;
 
               return (

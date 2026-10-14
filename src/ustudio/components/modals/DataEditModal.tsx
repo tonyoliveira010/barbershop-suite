@@ -264,7 +264,7 @@ export const DataEditModal: React.FC<DataEditModalProps> = ({ type, onClose }) =
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="text-[10px] font-bold text-white/50 block mb-1">
-                  WhatsApp
+                  Link do WhatsApp
                 </label>
                 <input
                   type="text"
@@ -277,7 +277,7 @@ export const DataEditModal: React.FC<DataEditModalProps> = ({ type, onClose }) =
 
               <div>
                 <label className="text-[10px] font-bold text-white/50 block mb-1">
-                  Instagram
+                  Link do Instagram
                 </label>
                 <input
                   type="text"
@@ -304,13 +304,13 @@ export const DataEditModal: React.FC<DataEditModalProps> = ({ type, onClose }) =
 
             <div>
               <label className="text-[10px] font-bold text-white/50 block mb-1">
-                Endereço
+                Link da localização
               </label>
               <input
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder="Av. Paulista, 1000 · Bela Vista, São Paulo — SP"
+                placeholder="https://www.google.com/maps?q=-23.5505,-46.6333"
                 className="w-full px-3.5 py-2.5 rounded-xl bg-[#1e1e1e] border border-white/10 text-white font-medium focus:outline-none focus:border-white/30"
               />
             </div>
