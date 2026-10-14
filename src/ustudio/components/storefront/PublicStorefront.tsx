@@ -1051,7 +1051,7 @@ export const PublicStorefront: React.FC = () => {
                   </button>
                 </div>
                 <p className="text-[11px] text-white/40 text-center leading-relaxed">
-                  Cartão em até 12x ou Pix. O horário fica reservado para você.
+                  Reserva local neste aparelho. Pagamento no estabelecimento; não há cobrança ou confirmação automática.
                 </p>
               </div>
             )}
