@@ -17,6 +17,7 @@ import {
   Phone,
   Mail,
   AtSign,
+  ImageIcon,
 } from 'lucide-react';
 
 const DOWS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -491,7 +492,7 @@ export const PublicStorefront: React.FC = () => {
                     <div className="space-y-2.5">
                       {items.map((s) => (
                         <button key={s.id} type="button" onClick={() => openBookingFor(s)} className="group flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-[#161616] p-3 text-left transition-all hover:border-white/25 hover:bg-[#1e1e1e]">
-                          {s.image ? <img src={s.image} alt="" className="h-14 w-14 flex-none rounded-xl object-cover" /> : <span className="flex h-14 w-14 flex-none items-center justify-center rounded-xl bg-[#202020] text-lg">{s.emoji || cat.emoji || '✂️'}</span>}
+                          {s.image ? <img src={s.image} alt="" className="h-14 w-14 flex-none rounded-xl object-cover" /> : <span className="flex h-14 w-14 flex-none items-center justify-center rounded-xl bg-secondary text-muted-foreground"><ImageIcon className="h-5 w-5" /></span>}
                           <div className="min-w-0 flex-1">
                             <b className="block truncate text-sm font-bold text-white">{s.name}</b>
                             <span className="mt-0.5 block text-xs text-white/50">{s.duration}</span>
