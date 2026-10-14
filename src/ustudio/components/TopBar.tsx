@@ -1,5 +1,8 @@
 // @ts-nocheck -- ported as-is from the original AI Studio project
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from '@tanstack/react-router';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
 import { useApp } from '../context/AppContext';
 import { Bell, ExternalLink, X, CheckCircle2, Calendar, Sparkles } from 'lucide-react';
 
@@ -7,6 +10,8 @@ export const TopBar: React.FC = () => {
   const { profile, setIsStorefrontOpen, clients } = useApp();
   const [showNotifications, setShowNotifications] = useState(false);
 
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => { supabase.auth.getSession().then(({data}) => setSignedIn(!!data.session)); const {data} = supabase.auth.onAuthStateChange((_event, session) => setSignedIn(!!session)); return () => data.subscription.unsubscribe(); }, []);
   return (
     <>
       <header className="flex items-center justify-between px-5 pt-6 pb-2">
@@ -35,6 +40,7 @@ export const TopBar: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
+          <Button asChild variant="ghost" size="sm"><Link to="/auth">{signedIn ? "Conta" : "Entrar"}</Link></Button>
           <button
             onClick={() => setIsStorefrontOpen(true)}
             className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#161616] border border-white/10 text-xs font-medium text-white/80 hover:text-white hover:bg-[#1e1e1e] transition-colors"
@@ -114,7 +120,7 @@ export const TopBar: React.FC = () => {
                 <div>
                   <p className="text-sm font-semibold text-white">Studiolite no ar</p>
                   <p className="text-xs text-white/60 mt-0.5">
-                    Seu catálogo de serviços e pagamentos Pix/InfinitePay estão configurados e ativos.
+                    Sua vitrine está pronta para personalizar. InfinitePay e Pix por API ficam em breve.
                   </p>
                   <span className="text-[10px] text-white/40 mt-1 block">Ontem</span>
                 </div>

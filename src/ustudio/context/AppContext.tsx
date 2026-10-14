@@ -212,7 +212,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [daySchedule]);
 
   useEffect(() => {
-    localStorage.setItem('studiolite_profile', JSON.stringify(profile));
+    try { localStorage.setItem('studiolite_profile', JSON.stringify(profile)); } catch { showToast('Não há espaço neste aparelho para esta capa. Use um vídeo menor.'); }
   }, [profile]);
 
   useEffect(() => {
@@ -334,48 +334,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const client = clients.find((c) => c.id === clientId);
     if (!client) return;
 
-    const isToday = dayDisplay.toLowerCase().includes('hoje') || dayDisplay.toLowerCase().includes('sex');
-
-    setDaySchedule((prev) => {
-      const cleared = prev.map((s) => (s.id === clientId ? { time: s.time, type: 'free' as const } : s));
-      if (isToday) {
-        const slotIdx = cleared.findIndex((s) => s.time === newTime);
-        if (slotIdx > -1) {
-          cleared[slotIdx] = { time: newTime, type: 'client' as const, id: clientId };
-          return cleared;
-        }
-        return [...cleared, { time: newTime, type: 'client' as const, id: clientId }].sort((a, b) =>
-          a.time.localeCompare(b.time)
-        );
-      }
-      return cleared;
-    });
-
-    setClients((prev) =>
-      prev.map((c) =>
-        c.id === clientId
-          ? {
-              ...c,
-              time: `${dayDisplay}, ${newTime}`,
-            }
-          : c
-      )
-    );
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(dayDisplay) ? dayDisplay : localDate();
+    const cleared = daySchedule.filter(s => s.id !== clientId);
+    if (!availableSlots(date, durationMinutes(client.duration), workingHours, bookingSettings, cleared).includes(newTime)) return showToast('Horário indisponível. Escolha outro.');
+    setDaySchedule([...cleared, {date, time:newTime, durationMinutes:durationMinutes(client.duration), type:'client', id:clientId}]);
+    setClients(prev => prev.map(c => c.id === clientId ? {...c, date, time:`${date}, ${newTime}`} : c));
 
     setReschedulingClientId(null);
     showToast(`Reagendado para ${dayDisplay} às ${newTime}`);
   };
 
-  const blockSlot = (time: string) => {
-    setDaySchedule((prev) =>
-      prev.map((s) => (s.time === time ? { ...s, type: 'blocked', blockedReason: 'Indisponível' } : s))
-    );
+  const blockSlot = (time: string, date = localDate()) => {
+    setDaySchedule(prev => [...prev.filter(s => !(s.time === time && (s.date || localDate()) === date)), {time, date, type:'blocked', blockedReason:'Indisponível'}]);
     showToast(`Horário ${time} bloqueado`);
   };
 
-  const unblockSlot = (time: string) => {
+  const unblockSlot = (time: string, date = localDate()) => {
     setDaySchedule((prev) =>
-      prev.map((s) => (s.time === time ? { time: s.time, type: 'free' } : s))
+      prev.map((s) => (s.time === time && (s.date || localDate()) === date ? { time: s.time, date, type: 'free' } : s))
     );
     showToast(`Horário ${time} liberado para agendamento`);
   };

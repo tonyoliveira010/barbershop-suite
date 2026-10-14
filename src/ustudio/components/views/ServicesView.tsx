@@ -113,10 +113,10 @@ export const ServicesView: React.FC = () => {
               : 'bg-[#161616] border border-white/10 text-white/60 hover:text-white'
           }`}
         >
-          Todas ({services.length})
+          Todas ({services.filter(s => s.type === catalogTab).length})
         </button>
         {categories.map((cat) => {
-          const count = services.filter((s) => s.cat === cat.key).length;
+          const count = services.filter((s) => s.cat === cat.key && s.type === catalogTab).length;
           return (
             <button
               key={cat.key}
@@ -233,7 +233,7 @@ export const ServicesView: React.FC = () => {
                         )}
                         {s.type === 'produto' && (
                           <span className="absolute top-3 right-3 z-10 px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-300 bg-emerald-950/80 border border-emerald-500/40">
-                            Loja
+                            Reserva
                           </span>
                         )}
                         {!s.image && (
@@ -265,7 +265,7 @@ export const ServicesView: React.FC = () => {
                             <span className="text-[10px] text-white/45">{s.duration}</span>
                           </div>
                           <span className="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#ff5f8a] to-[#ef1f4d] text-white font-bold text-xs shadow-md group-hover:opacity-90">
-                            {s.type === 'produto' ? 'Comprar' : 'Detalhes'}
+                            {s.type === 'produto' ? 'Reservar' : 'Detalhes'}
                           </span>
                         </div>
                       </div>

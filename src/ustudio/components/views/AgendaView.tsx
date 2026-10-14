@@ -1,4 +1,5 @@
 // @ts-nocheck -- ported as-is from the original AI Studio project
+import { localDate, availableSlots } from '../../utils/availability';
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
@@ -13,7 +14,7 @@ import {
 
 export const AgendaView: React.FC = () => {
   const {
-    daySchedule,
+    daySchedule, bookingSettings,
     clients,
     workingHours, saveWorkingHours,
     setSelectedClientId,
@@ -25,7 +26,7 @@ export const AgendaView: React.FC = () => {
 
   const [blockedDate, setBlockedDate] = useState('');
   const [agendaMode, setAgendaMode] = useState<'dia' | 'semana' | 'mes'>('dia');
-  const [selectedDayNumber, setSelectedDayNumber] = useState<number>(11);
+  const [selectedDayNumber, setSelectedDayNumber] = useState<number>(new Date().getDate());
 
   const getInitials = (name: string) => {
     return name
@@ -50,73 +51,15 @@ export const AgendaView: React.FC = () => {
     .map((d) => daysLabelsMap[d] || d)
     .join(', ');
 
-  const weekColumns = [
-    {
-      dow: 'Sex',
-      day: 11,
-      items: [
-        { time: '09:00', text: 'Ana F. · Limpeza' },
-        { time: '11:30', text: 'Renata L. · Design' },
-        { time: '14:00', text: '14:00 livre', free: true },
-        { time: '16:00', text: 'Bianca S. · Massagem' },
-      ],
-    },
-    {
-      dow: 'Sáb',
-      day: 12,
-      items: [
-        { time: '09:00', text: '09:00 livre', free: true },
-        { time: '10:30', text: 'Camila P. · Escova' },
-        { time: '13:00', text: '13:00 livre', free: true },
-      ],
-    },
-    {
-      dow: 'Dom',
-      day: 13,
-      items: [{ time: '—', text: 'Fechado (Folga)', free: true }],
-    },
-    {
-      dow: 'Seg',
-      day: 14,
-      items: [
-        { time: '10:00', text: 'Paula M. · Peeling' },
-        { time: '13:00', text: '13:00 livre', free: true },
-        { time: '15:30', text: 'Juliana C. · Design' },
-      ],
-    },
-    {
-      dow: 'Ter',
-      day: 15,
-      items: [
-        { time: '09:00', text: '09:00 livre', free: true },
-        { time: '14:00', text: '14:00 livre', free: true },
-      ],
-    },
-    {
-      dow: 'Qua',
-      day: 16,
-      items: [
-        { time: '09:30', text: 'Júlia R. · Drenagem' },
-        { time: '11:00', text: 'Larissa B. · Henna' },
-        { time: '16:00', text: '16:00 livre', free: true },
-      ],
-    },
-    {
-      dow: 'Qui',
-      day: 17,
-      items: [
-        { time: '10:00', text: '10:00 livre', free: true },
-        { time: '14:30', text: '14:30 livre', free: true },
-      ],
-    },
-  ];
-
-  // Month days setup (Sept 2026, 30 days, starts Tuesday -> 2 offset cells)
-  const leadingOffset = 2;
-  const totalDays = 30;
-  const daysWithAppointments = [11, 12, 14, 16, 21, 25, 28];
-
-  return (
+  const month = new Date();
+  const totalDays = new Date(month.getFullYear(), month.getMonth()+1, 0).getDate();
+  const leadingOffset = new Date(month.getFullYear(), month.getMonth(), 1).getDay();
+  const dateForDay = (day) => localDate(new Date(month.getFullYear(), month.getMonth(), day));
+  const selectedDate = dateForDay(selectedDayNumber);
+  const currentSchedule = [...daySchedule.filter(s => (s.date || localDate()) === selectedDate && s.type !== 'free'), ...availableSlots(selectedDate, 30, workingHours, bookingSettings, daySchedule).map(time => ({time, date:selectedDate, type:'free'}))].sort((a,b) => a.time.localeCompare(b.time));
+  const daysWithAppointments = clients.filter(c => (c.date || localDate()).slice(0,7) === localDate().slice(0,7)).map(c => Number((c.date || localDate()).slice(8)));
+  const weekColumns = Array.from({length:7}, (_, i) => {const date = new Date();date.setDate(date.getDate()+i);const key=localDate(date);return {dow:date.toLocaleDateString('pt-BR',{weekday:'short'}),day:date.getDate(),items:[...clients.filter(c => (c.date || localDate()) === key).map(c => ({time:c.time.split(', ').pop(),text:c.name+' · '+c.service})),...availableSlots(key,30,workingHours,bookingSettings,daySchedule).slice(0,4).map(time=>({time,text:time+' livre',free:true}))]};});
+  return (  return (
     <div className="px-5 space-y-4">
       <section className="space-y-2 border-b border-border pb-4"><h3 className="text-sm font-semibold">Bloquear uma data</h3><div className="flex gap-2"><input aria-label="Data para bloquear" type="date" value={blockedDate} onChange={e => setBlockedDate(e.target.value)} className="min-w-0 flex-1 rounded-xl border border-border bg-secondary p-2 text-foreground" /><button onClick={() => { if (blockedDate) saveWorkingHours({...workingHours, blockedDates: Array.from(new Set([...(workingHours.blockedDates || []), blockedDate]))}); }} className="rounded-xl border border-border px-3 text-sm">Bloquear dia</button></div>{(workingHours.blockedDates || []).map(date => <div key={date} className="flex items-center justify-between text-xs text-muted-foreground">{date}<button onClick={() => saveWorkingHours({...workingHours, blockedDates: workingHours.blockedDates.filter(d => d !== date)})}>Liberar</button></div>)}</section>
       {/* Header */}
@@ -183,15 +126,15 @@ export const AgendaView: React.FC = () => {
 
             <div className="text-center">
               <span className="text-sm font-bold text-white block">
-                {selectedDayNumber === 11 ? 'Sexta-feira' : `Dia ${selectedDayNumber}`}
+                {new Date(selectedDate + 'T12:00:00').toLocaleDateString('pt-BR', {weekday:'long'})}
               </span>
               <span className="text-xs text-white/50">
-                {selectedDayNumber} de setembro de 2026
+                {new Date(selectedDate + 'T12:00:00').toLocaleDateString('pt-BR')}
               </span>
             </div>
 
             <button
-              onClick={() => setSelectedDayNumber((prev) => Math.min(30, prev + 1))}
+              onClick={() => setSelectedDayNumber((prev) => Math.min(totalDays, prev + 1))}
               className="w-9 h-9 rounded-full bg-[#1e1e1e] border border-white/10 flex items-center justify-center text-white hover:bg-[#262626] transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
@@ -200,7 +143,8 @@ export const AgendaView: React.FC = () => {
 
           {/* Schedule Slots */}
           <div className="space-y-2.5">
-            {daySchedule.map((slot) => {
+            {workingHours.blockedDates?.includes(selectedDate) && <p className="py-4 text-center text-sm text-muted-foreground">Dia bloqueado para agendamentos</p>}
+            {currentSchedule.map((slot) => {
               if (slot.type === 'client') {
                 const client = clients.find((c) => c.id === slot.id);
                 if (!client) return null;
@@ -263,7 +207,7 @@ export const AgendaView: React.FC = () => {
                       </div>
                     </div>
                     <button
-                      onClick={() => unblockSlot(slot.time)}
+                      onClick={() => unblockSlot(slot.time, selectedDate)}
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#1e1e1e] hover:bg-[#262626] text-xs font-semibold text-white/70 hover:text-white transition-colors"
                     >
                       <Unlock className="w-3 h-3" />
@@ -293,7 +237,7 @@ export const AgendaView: React.FC = () => {
                       <span>Encaixar</span>
                     </button>
                     <button
-                      onClick={() => blockSlot(slot.time)}
+                      onClick={() => blockSlot(slot.time, selectedDate)}
                       className="px-2.5 py-1 rounded-full bg-[#161616] border border-white/10 hover:bg-[#222] text-xs font-semibold text-white/50 hover:text-white transition-colors"
                     >
                       Bloquear
@@ -314,7 +258,7 @@ export const AgendaView: React.FC = () => {
           </p>
           <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
             {weekColumns.map((col) => {
-              const isToday = col.day === 11;
+              const isToday = col.day === new Date().getDate();
               return (
                 <div
                   key={col.day}
@@ -360,7 +304,7 @@ export const AgendaView: React.FC = () => {
       {agendaMode === 'mes' && (
         <div className="p-4 rounded-3xl bg-[#161616] border border-white/10 space-y-3">
           <div className="flex items-center justify-between pb-2 border-b border-white/10">
-            <span className="text-sm font-bold text-white">Setembro 2026</span>
+            <span className="text-sm font-bold text-white">{month.toLocaleDateString('pt-BR', {month:'long',year:'numeric'})}</span>
             <span className="text-xs text-white/50">
               {daysWithAppointments.length} dias com atendimentos
             </span>
@@ -381,7 +325,7 @@ export const AgendaView: React.FC = () => {
             {/* Days 1 to 30 */}
             {Array.from({ length: totalDays }).map((_, i) => {
               const day = i + 1;
-              const isToday = day === 11;
+              const isToday = day === new Date().getDate();
               const hasAppt = daysWithAppointments.includes(day);
 
               return (
